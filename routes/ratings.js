@@ -76,6 +76,46 @@ router.post('/range', (req, res) => {
     });
 });
 
+router.post('/report', (req, res) => {
+    const {
+        startDate,
+        endDate,
+        settingsId,
+    } = req.body;
+
+
+    model.ratings.findAll({
+
+            where: {
+                settingId: settingsId,
+                time: {
+                    [Op.gte]: new Date(`${startDate}T00:00:00.000Z`),
+                    [Op.lt]: new Date(`${endDate}T23:59:59.999Z`),
+                },
+            },
+            include: [{
+                model: model.emoticons,
+                attributes: ['name', 'symbol', 'value'],
+            }],
+            attributes: [
+                'emoticonId',
+                [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
+            ],
+            group: ['emoticonId'],
+
+        })
+        .then(count => res.json({
+            error: false,
+            data: count,
+        }))
+        .catch(error => res.json({
+            error: true,
+            data: [],
+            message: error,
+        }));
+});
+
+
 /* get count of ratings in one day */
 router.post('/count', (req, res) => {
     const {
