@@ -6,7 +6,7 @@ const model = require('../models/index');
 
 const Op = sequelize.Op;
 
-/* GET users listing. */
+/* GET all ratings. */
 router.get('/', (req, res) => {
     model.ratings.findAll({
             include: [model.settings],
@@ -21,7 +21,8 @@ router.get('/', (req, res) => {
         }));
 });
 
-router.post('/range', async (req, res) => {
+/* get count of ratings in specified intervals */
+router.post('/range', (req, res) => {
     const {
         date,
         interval,
@@ -60,14 +61,14 @@ router.post('/range', async (req, res) => {
             group: ['emoticonId'],
             include: [{
                 model: model.emoticons,
-                attributes: ['name', 'symbol'],
+                attributes: ['name', 'symbol', 'value'],
             }],
             raw: true,
         }));
     }
 
     Promise.all(promises).then((result) => {
-        //const filtered = result.filter(el => el.length > 0);
+        /* const filtered = result.filter(el => el.length > 0); */
         res.json({
             error: false,
             data: result,
@@ -75,7 +76,8 @@ router.post('/range', async (req, res) => {
     });
 });
 
-router.post('/count', async (req, res) => {
+/* get count of ratings in one day */
+router.post('/count', (req, res) => {
     const {
         date,
         settingsId,
@@ -110,46 +112,10 @@ router.post('/count', async (req, res) => {
             data: [],
             message: error,
         }));
-
 });
 
-router.get('/counts', (req, res) => {
-    model.ratings.findAll({
-            attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
-            group: ['emoticonId'],
-            raw: true,
-        })
-        .then(ratings => res.json({
-            error: false,
-            data: ratings,
-        }))
-        .catch(error => res.json({
-            error: true,
-            data: [],
-            message: error,
-        }));
-});
 
-router.get('/counts/:settingId', (req, res) => {
-    const setting = req.params.settingId;
-    model.ratings.findAll({
-            attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
-            where: {
-                settingId: setting,
-            },
-            group: ['emoticonId'],
-            raw: true,
-        }).then(ratings => res.json({
-            error: false,
-            data: ratings,
-        }))
-        .catch(error => res.json({
-            error: true,
-            data: [],
-            message: error,
-        }));
-});
-
+/* GET one rating */
 router.get('/:id', (req, res) => {
     const ratingId = req.params.id;
 
@@ -168,7 +134,40 @@ router.get('/:id', (req, res) => {
         }));
 });
 
+/* CREATE bulk of ratings */
+router.post('/many', async (req, res) => {
+    const {
+        ratingsArray,
+    } = req.body;
 
+    const settings = await model.settings.findOne({
+        order: [
+            ['createdAt', 'DESC'],
+        ],
+        raw: true,
+    });
+
+    const promises = [];
+
+    ratingsArray.forEach((rating) => {
+        promises.push(model.ratings.create({
+            emoticonId: rating.emoticonId,
+            time: Date(),
+            settingId: settings.id,
+        }));
+    });
+
+    Promise.all(promises).then((result) => {
+        /* const filtered = result.filter(el => el.length > 0); */
+        res.json({
+            error: false,
+            data: result,
+            message: 'Ratings have been created',
+        });
+    });
+});
+
+/* ADD new rating */
 router.post('/', async (req, res) => {
     const {
         emoticonId,
@@ -212,7 +211,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-
+/* UPDATE rating */
 router.put('/:id', (req, res) => {
     const ratingId = req.params.id;
 
@@ -240,3 +239,40 @@ router.put('/:id', (req, res) => {
 
 
 module.exports = router;
+
+/* router.get('/counts', (req, res) => {
+    model.ratings.findAll({
+            attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
+            group: ['emoticonId'],
+            raw: true,
+        })
+        .then(ratings => res.json({
+            error: false,
+            data: ratings,
+        }))
+        .catch(error => res.json({
+            error: true,
+            data: [],
+            message: error,
+        }));
+}); */
+
+/* router.get('/counts/:settingId', (req, res) => {
+    const setting = req.params.settingId;
+    model.ratings.findAll({
+            attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
+            where: {
+                settingId: setting,
+            },
+            group: ['emoticonId'],
+            raw: true,
+        }).then(ratings => res.json({
+            error: false,
+            data: ratings,
+        }))
+        .catch(error => res.json({
+            error: true,
+            data: [],
+            message: error,
+        }));
+}); */
