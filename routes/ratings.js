@@ -134,6 +134,39 @@ router.get('/:id', (req, res) => {
         }));
 });
 
+/* CREATE bulk of ratings */
+router.post('/many', async (req, res) => {
+    const {
+        ratingsArray,
+    } = req.body;
+
+    const settings = await model.settings.findOne({
+        order: [
+            ['createdAt', 'DESC'],
+        ],
+        raw: true,
+    });
+
+    const promises = [];
+
+    ratingsArray.forEach((rating) => {
+        promises.push(model.ratings.create({
+            emoticonId: rating.emoticonId,
+            time: Date(),
+            settingId: settings.id,
+        }));
+    });
+
+    Promise.all(promises).then((result) => {
+        /* const filtered = result.filter(el => el.length > 0); */
+        res.json({
+            error: false,
+            data: result,
+            message: 'Ratings have been created',
+        });
+    });
+});
+
 /* ADD new rating */
 router.post('/', async (req, res) => {
     const {
