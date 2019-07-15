@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     emoticonsGroupId: DataTypes.INTEGER,
     symbol: DataTypes.STRING,
+    value: DataTypes.INTEGER
   }, {});
   emoticons.associate = function (models) {
     emoticons.belongsTo(models.emoticonsGroups, {
