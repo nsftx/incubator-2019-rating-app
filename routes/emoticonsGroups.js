@@ -38,6 +38,47 @@ router.post('/', (req, res) => {
         message: error,
       }));
   });
+
+  //  array post
+  router.post('/many', async (req, res) => {
+    const {
+        name,
+        emoticonsArray,
+    } = req.body;
+    const group = await model.emoticonsGroups.create({
+      name,
+
+    });
+    if (typeof (emoticonsArray) !== 'undefined') {
+      if (emoticonsArray.length < 3 || emoticonsArray.length > 5) {
+        res.json({
+          error: true,
+          message: 'Emoticons should be in range 3-5 sec!',
+        });
+        return;
+      }
+    }
+      
+    const promises = [];
+ 
+    emoticonsArray.forEach((emoticon) => {
+        promises.push(model.emoticons.create({
+            name: emoticon.name,
+            value: emoticon.value,
+            symbol: emoticon.symbol,
+            emoticonsGroupId: 2
+        }));
+    });
+ 
+    Promise.all(promises).then((result) => {
+        /* const filtered = result.filter(el => el.length > 0); */
+        res.json({
+            error: false,
+            data: result,
+            message: 'Ratings have been created',
+        });
+    });
+ });
 // put
 router.put('/:id', (req, res) => {
     const emoticonsGroupID = req.params.id;
