@@ -46,6 +46,47 @@ router.post('/', (req, res) => {
     }
 });
 
+
+// update settings to new message
+router.post('/:settingId', async (req, res) => {
+    const {
+        text,
+        language,
+    } = req.body;
+
+    // eslint-disable-next-line prefer-destructuring
+    const settingId = req.params.settingId;
+
+    if (text.length < 3 || text.length > 120) {
+        res.json({
+            error: true,
+            message: 'Text must be between 3 and 120 characters!',
+        });
+    } else {
+        model.messages.create({
+                text,
+                language,
+            }).then((messages) => {
+                model.settings.update({
+                    messageId: messages.dataValues.id,
+                }, {
+                    where: {
+                        id: settingId,
+                    },
+                });
+            })
+            .then(messages => res.json({
+                error: false,
+                data: messages,
+                message: 'Message has been created!',
+            }))
+            .catch(error => res.json({
+                error: true,
+                message: error,
+            }));
+    }
+});
+
 router.put('/:id', (req, res) => {
     const messageId = req.params.id;
 

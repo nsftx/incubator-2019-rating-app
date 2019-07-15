@@ -46,7 +46,7 @@ router.post('/', (req, res) => {
         name,
         emoticonsArray,
     } = req.body;
-    const group = await model.emoticonsGroups.create({
+     await model.emoticonsGroups.create({
       name,
 
     });
