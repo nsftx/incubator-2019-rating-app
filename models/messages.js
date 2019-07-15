@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = (sequelize, DataTypes) => {
   const messages = sequelize.define('messages', {
     text: DataTypes.STRING,

@@ -1,4 +1,3 @@
-'use strict';
 module.exports = (sequelize, DataTypes) => {
   const settings = sequelize.define('settings', {
     emoticonNumber: DataTypes.INTEGER,
@@ -7,19 +6,19 @@ module.exports = (sequelize, DataTypes) => {
     emoticonsGroupId: DataTypes.INTEGER,
     userId: DataTypes.INTEGER,
   }, {});
-  settings.associate = function (models) {
+  settings.associate = (models) => {
     settings.hasMany(models.ratings, {
-      as: 'ratings'
+      as: 'ratings',
     });
     settings.belongsTo(models.emoticonsGroups, {
-      foreignKey: 'emoticonsGroupId'
+      foreignKey: 'emoticonsGroupId',
     });
     settings.belongsTo(models.users, {
-      foreignKey: 'userId'
+      foreignKey: 'userId',
     });
     settings.belongsTo(models.messages, {
       foreignKey: 'messageId',
-      as: 'message'
+      as: 'message',
     });
   };
   return settings;

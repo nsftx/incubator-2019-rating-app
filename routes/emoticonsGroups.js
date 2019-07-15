@@ -28,58 +28,56 @@ router.post('/', (req, res) => {
 
     })
 
-      .then(emoticonsGroups => res.status(201).json({
-        error: false,
-        data: emoticonsGroups,
-        message: 'New emoticon has been created.',
-      }))
-      .catch(error => res.json({
+    .then(emoticonsGroups => res.status(201).json({
+      error: false,
+      data: emoticonsGroups,
+      message: 'New emoticon has been created.',
+    }))
+    .catch(error => res.json({
+      error: true,
+      data: [],
+      message: error,
+    }));
+});
+
+//  array post
+router.post('/many', async (req, res) => {
+  const {
+    name,
+    emoticonsArray,
+  } = req.body;
+  await model.emoticonsGroups.create({
+    name,
+
+  });
+  if (typeof (emoticonsArray) !== 'undefined') {
+    if (emoticonsArray.length < 3 || emoticonsArray.length > 5) {
+      res.json({
         error: true,
-        data: [],
-        message: error,
-      }));
+        message: 'Emoticons should be in range 3-5 sec!',
+      });
+      return;
+    }
+  }
+  const promises = [];
+  emoticonsArray.forEach((emoticon) => {
+    promises.push(model.emoticons.create({
+      name: emoticon.name,
+      value: emoticon.value,
+      symbol: emoticon.symbol,
+      emoticonsGroupId: 2,
+    }));
   });
 
-  //  array post
-  router.post('/many', async (req, res) => {
-    const {
-        name,
-        emoticonsArray,
-    } = req.body;
-     await model.emoticonsGroups.create({
-      name,
-
+  Promise.all(promises).then((result) => {
+    /* const filtered = result.filter(el => el.length > 0); */
+    res.json({
+      error: false,
+      data: result,
+      message: 'Ratings have been created',
     });
-    if (typeof (emoticonsArray) !== 'undefined') {
-      if (emoticonsArray.length < 3 || emoticonsArray.length > 5) {
-        res.json({
-          error: true,
-          message: 'Emoticons should be in range 3-5 sec!',
-        });
-        return;
-      }
-    }
-      
-    const promises = [];
- 
-    emoticonsArray.forEach((emoticon) => {
-        promises.push(model.emoticons.create({
-            name: emoticon.name,
-            value: emoticon.value,
-            symbol: emoticon.symbol,
-            emoticonsGroupId: 2
-        }));
-    });
- 
-    Promise.all(promises).then((result) => {
-        /* const filtered = result.filter(el => el.length > 0); */
-        res.json({
-            error: false,
-            data: result,
-            message: 'Ratings have been created',
-        });
-    });
- });
+  });
+});
 
 // put
 router.put('/:id', (req, res) => {

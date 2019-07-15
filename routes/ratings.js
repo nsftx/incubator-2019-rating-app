@@ -4,6 +4,7 @@ const sequelize = require('sequelize');
 const router = express.Router();
 const model = require('../models/index');
 
+// eslint-disable-next-line prefer-destructuring
 const Op = sequelize.Op;
 
 /* GET all ratings. */
@@ -282,7 +283,7 @@ module.exports = router;
 
 /* router.get('/counts', (req, res) => {
     model.ratings.findAll({
-            attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
+        attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
             group: ['emoticonId'],
             raw: true,
         })
@@ -300,7 +301,7 @@ module.exports = router;
 /* router.get('/counts/:settingId', (req, res) => {
     const setting = req.params.settingId;
     model.ratings.findAll({
-            attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
+        attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
             where: {
                 settingId: setting,
             },
