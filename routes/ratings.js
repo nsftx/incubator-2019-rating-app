@@ -57,7 +57,7 @@ router.post('/range', async (req, res) => {
                 [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
 
             ],
-            group: 'emoticonId',
+            group: ['emoticonId'],
             include: [{
                 model: model.emoticons,
                 attributes: ['name', 'symbol'],
@@ -67,12 +67,50 @@ router.post('/range', async (req, res) => {
     }
 
     Promise.all(promises).then((result) => {
-        const filtered = result.filter(el => el.length > 0);
+        //const filtered = result.filter(el => el.length > 0);
         res.json({
             error: false,
-            data: filtered,
+            data: result,
         });
     });
+});
+
+router.post('/count', async (req, res) => {
+    const {
+        date,
+        settingsId,
+    } = req.body;
+
+
+    model.ratings.findAll({
+            where: {
+                settingId: settingsId,
+                time: {
+                    [Op.startsWith]: date,
+                },
+            },
+            attributes: [
+                'emoticonId',
+                [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
+
+            ],
+            group: ['emoticonId'],
+            include: [{
+                model: model.emoticons,
+                attributes: ['name', 'symbol'],
+            }],
+            raw: true,
+        })
+        .then(count => res.json({
+            error: false,
+            data: count,
+        }))
+        .catch(error => res.json({
+            error: true,
+            data: [],
+            message: error,
+        }));
+
 });
 
 router.get('/counts', (req, res) => {
@@ -80,7 +118,8 @@ router.get('/counts', (req, res) => {
             attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
             group: ['emoticonId'],
             raw: true,
-        }).then(ratings => res.json({
+        })
+        .then(ratings => res.json({
             error: false,
             data: ratings,
         }))
