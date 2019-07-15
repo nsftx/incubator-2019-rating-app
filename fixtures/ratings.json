@@ -1,0 +1,27 @@
+[{
+        "model": "ratings",
+        "data": {
+            "emoticonId": 2,
+            "settingId": 2
+        }
+    },
+    {
+        "model": "ratings",
+        "data": {
+            "emoticonId": 2,
+            "settingId": 2
+        }
+    }, {
+        "model": "ratings",
+        "data": {
+            "emoticonId": 2,
+            "settingId": 2
+        }
+    }, {
+        "model": "ratings",
+        "data": {
+            "emoticonId": 2,
+            "settingId": 2
+        }
+    }
+]

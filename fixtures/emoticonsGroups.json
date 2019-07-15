@@ -1,0 +1,25 @@
+[{
+        "model": "emoticonsGroups",
+        "data": {
+            "name": "Stars"
+        }
+    },
+    {
+        "model": "emoticonsGroups",
+        "data": {
+            "name": "Smileys"
+        }
+    },
+    {
+        "model": "emoticonsGroups",
+        "data": {
+            "name": "Numbers"
+        }
+    },
+    {
+        "model": "emoticonsGroups",
+        "data": {
+            "name": "Thumbs"
+        }
+    }
+]

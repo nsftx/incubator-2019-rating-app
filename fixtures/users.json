@@ -1,0 +1,32 @@
+[{
+        "model": "users",
+        "data": {
+            "email": "test@devhive.com"
+
+        }
+    },
+    {
+        "model": "users",
+        "data": {
+            "email": "devhive@devhive.com"
+        }
+    },
+    {
+        "model": "users",
+        "data": {
+            "email": "test@nsoft.com"
+        }
+    },
+    {
+        "model": "users",
+        "data": {
+            "email": "devhive@test.com"
+        }
+    },
+    {
+        "model": "users",
+        "data": {
+            "email": "test@test.com"
+        }
+    }
+]

@@ -1,0 +1,50 @@
+[{
+        "model": "messages",
+        "data": {
+            "text": "Thank you, come again!",
+            "language": "en"
+        }
+    },
+    {
+        "model": "messages",
+        "data": {
+            "text": "Thank you for your rating!",
+            "language": "en"
+        }
+    },
+    {
+        "model": "messages",
+        "data": {
+            "text": "Vielen Dank für Ihre Bewertung!",
+            "language": "de"
+        }
+    },
+    {
+        "model": "messages",
+        "data": {
+            "text": "Vielen Dank für Ihre Bewertung!",
+            "language": "de"
+        }
+    },
+    {
+        "model": "messages",
+        "data": {
+            "text": "Hvala na vašoj ocjeni",
+            "language": "hr"
+        }
+    },
+    {
+        "model": "messages",
+        "data": {
+            "text": "Grazie per la tua valutazione!",
+            "language": "it"
+        }
+    },
+    {
+        "model": "messages",
+        "data": {
+            "text": "Спасибо за ваш рейтинг!",
+            "language": "ru"
+        }
+    }
+]

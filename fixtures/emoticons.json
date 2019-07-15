@@ -1,0 +1,49 @@
+[{
+        "model": "emoticons",
+        "data": {
+            "name": "meh",
+            "emoticonsGroupId": 2,
+            "symbol": ":|"
+        }
+    },
+    {
+        "model": "emoticons",
+        "data": {
+            "name": "happy",
+            "emoticonsGroupId": 2,
+            "symbol": ":)"
+        }
+    },
+    {
+        "model": "emoticons",
+        "data": {
+            "name": "sad",
+            "emoticonsGroupId": 2,
+            "symbol": ":("
+        }
+    },
+    {
+        "model": "emoticons",
+        "data": {
+            "name": "empty-star",
+            "emoticonsGroupId": 1,
+            "symbol": "*"
+        }
+    },
+    {
+        "model": "emoticons",
+        "data": {
+            "name": "half-star",
+            "emoticonsGroupId": 1,
+            "symbol": "**"
+        }
+    },
+    {
+        "model": "emoticons",
+        "data": {
+            "name": "full-star",
+            "emoticonsGroupId": 2,
+            "symbol": "***"
+        }
+    }
+]
