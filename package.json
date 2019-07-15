@@ -12,13 +12,12 @@
     "express": "~4.16.1",
     "googleapis": "^40.0.1",
     "http-errors": "~1.6.3",
-    "jade": "~1.11.0",
+    "lodash": "^4.17.14",
     "moment": "^2.24.0",
     "morgan": "~1.9.1",
     "mysql2": "^1.6.5",
     "sequelize": "^5.9.2",
-    "sequelize-fixtures": "^1.0.2",
-    "underscore": "^1.9.1"
+    "sequelize-fixtures": "^1.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.5.4",
