@@ -24,11 +24,13 @@ router.post('/', (req, res) => {
     name,
     symbol,
     emoticonsGroupId,
+    value,
   } = req.body;
   model.emoticons.create({
     name,
     symbol,
     emoticonsGroupId,
+    value,
   })
     .then(emoticons => res.status(201).json({
       error: false,
@@ -51,12 +53,14 @@ router.put('/:id', (req, res) => {
     name,
     symbol,
     emoticonsGroupId,
+    value,
   } = req.body;
 
   model.emoticons.update({
     name,
     symbol,
     emoticonsGroupId,
+    value,
   }, {
     where: {
       id,
