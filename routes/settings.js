@@ -184,8 +184,7 @@ router.put('/:id', async (req, res) => {
 		raw: true,
 	});
 
-
-	// if not changed => update, else => create new
+	// if emoticonNumber not changed => update, else => create new
 	if (old !== null) {
 		model.settings.update({
 				emoticonNumber,
