@@ -7,12 +7,12 @@ const model = require('../models/index');
 // get all
 router.get('/', (req, res) => {
   model.emoticonsGroups.findAll({
-    include: [model.emoticons],
-  })
+      include: [model.emoticons],
+    })
     .then(emoticonsGroups => res.json({
       error: false,
       data: emoticonsGroups,
-      
+
     }))
     .catch(error => res.json({
       error: true,
@@ -52,36 +52,40 @@ router.post('/many', async (req, res) => {
   } = req.body;
   await model.emoticonsGroups.create({
     name,
-
-  });
-  if (typeof (emoticonsArray) !== 'undefined') {
-    if (emoticonsArray.length < 3 || emoticonsArray.length > 5) {
-      res.json({
-        error: true,
-        message: 'Emoticons should be in range 3-5 sec!',
-      });
-      return;
+  }).then((group) => {
+    if (typeof (emoticonsArray) !== 'undefined') {
+      if (emoticonsArray.length < 3 || emoticonsArray.length > 5) {
+        res.json({
+          error: true,
+          message: 'Emoticons should be in range 3-5 sec!',
+        });
+        return;
+      }
     }
-  }
-  const promises = [];
-  emoticonsArray.forEach((emoticon) => {
-    promises.push(model.emoticons.create({
-      name: emoticon.name,
-      value: emoticon.value,
-      symbol: emoticon.symbol,
-      emoticonsGroupId: 2,
-    }));
-  });
-
-  Promise.all(promises).then((result) => {
-    /* const filtered = result.filter(el => el.length > 0); */
-    res.json({
-      error: false,
-      data: result,
-      message: 'Ratings have been created',
+    const promises = [];
+    emoticonsArray.forEach((emoticon) => {
+      promises.push(model.emoticons.create({
+        name: emoticon.name,
+        value: emoticon.value,
+        symbol: emoticon.symbol,
+        emoticonsGroupId: group.dataValues.id,
+      }));
     });
-  });
+
+    Promise.all(promises).then((result) => {
+      /* const filtered = result.filter(el => el.length > 0); */
+      res.json({
+        error: false,
+        data: result,
+        message: 'Emoticons have been created',
+      });
+    });
+  }).catch(error => res.json({
+    error: true,
+    message: error,
+  }));
 });
+
 
 // put
 router.put('/:id', (req, res) => {
