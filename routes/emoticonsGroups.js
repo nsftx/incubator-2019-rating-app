@@ -6,9 +6,13 @@ const model = require('../models/index');
 
 // get all
 router.get('/', (req, res) => {
-  model.emoticonsGroups.findAll().then(emoticonsGroups => res.json({
+  model.emoticonsGroups.findAll({
+    include: [model.emoticons],
+  })
+    .then(emoticonsGroups => res.json({
       error: false,
       data: emoticonsGroups,
+      
     }))
     .catch(error => res.json({
       error: true,
