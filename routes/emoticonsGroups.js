@@ -7,7 +7,7 @@ const model = require('../models/index');
 // get all
 router.get('/', (req, res) => {
   model.emoticonsGroups.findAll({
-    include: [model.settings],
+    include: [model.emoticons],
   })
     .then(emoticonsGroups => res.json({
       error: false,
