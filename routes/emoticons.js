@@ -1,4 +1,3 @@
-
 const express = require('express');
 
 const router = express.Router();
@@ -6,15 +5,15 @@ const model = require('../models/index');
 // var sequelize = require('sequelize')
 
 router.get('/', (req, res) => {
-    model.emoticons.findAll().then(emoticons => res.json({
-            error: false,
-            data: emoticons,
-        }))
-        .catch(error => res.json({
-            error: true,
-            data: [],
-            message: error,
-        }));
+  model.emoticons.findAll().then(emoticons => res.json({
+      error: false,
+      data: emoticons,
+    }))
+    .catch(error => res.json({
+      error: true,
+      data: [],
+      message: error,
+    }));
 });
 
 
@@ -27,11 +26,11 @@ router.post('/', (req, res) => {
     value,
   } = req.body;
   model.emoticons.create({
-    name,
-    symbol,
-    emoticonsGroupId,
-    value,
-  })
+      name,
+      symbol,
+      emoticonsGroupId,
+      value,
+    })
     .then(emoticons => res.status(201).json({
       error: false,
       data: emoticons,
@@ -47,7 +46,9 @@ router.post('/', (req, res) => {
 // Emoticons UPDATE
 
 router.put('/:id', (req, res) => {
-  const { id } = req.params;
+  const {
+    id,
+  } = req.params;
 
   const {
     name,
@@ -57,15 +58,15 @@ router.put('/:id', (req, res) => {
   } = req.body;
 
   model.emoticons.update({
-    name,
-    symbol,
-    emoticonsGroupId,
-    value,
-  }, {
-    where: {
-      id,
-    },
-  })
+      name,
+      symbol,
+      emoticonsGroupId,
+      value,
+    }, {
+      where: {
+        id,
+      },
+    })
     .then(emoticons => res.json({
       error: false,
       data: emoticons,
@@ -79,26 +80,26 @@ router.put('/:id', (req, res) => {
 
 // get one
 router.get('/:id', (req, res) => {
-    const EmoticonsId = req.params.id;
+  const EmoticonsId = req.params.id;
 
-    model.settings.findOne({
-            where: {
-                id: EmoticonsId,
-            },
-            include: [{
-                model: model.emoticonsGroups,
+  model.settings.findOne({
+      where: {
+        id: EmoticonsId,
+      },
+      include: [{
+        model: model.emoticonsGroups,
 
 
-            }],
-        })
-        .then(emoticons => res.json({
-            error: false,
-            data: emoticons,
-        }))
-        .catch(error => res.json({
-            error: true,
-            message: error,
-        }));
+      }],
+    })
+    .then(emoticons => res.json({
+      error: false,
+      data: emoticons,
+    }))
+    .catch(error => res.json({
+      error: true,
+      message: error,
+    }));
 });
 
 
@@ -107,10 +108,10 @@ router.delete('/:id', (req, res) => {
   const EmoticonsId = req.params.id;
 
   model.emoticons.destroy({
-    where: {
-      id: EmoticonsId,
-    },
-  })
+      where: {
+        id: EmoticonsId,
+      },
+    })
     .then(status => res.json({
       error: false,
       data: status,

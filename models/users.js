@@ -1,12 +1,11 @@
-'use strict';
 module.exports = (sequelize, DataTypes) => {
   const users = sequelize.define('users', {
     email: DataTypes.STRING,
-    isSuperAdmin: DataTypes.BOOLEAN
+    isSuperAdmin: DataTypes.BOOLEAN,
   }, {});
-  users.associate = function (models) {
+  users.associate = (models) => {
     users.hasMany(models.settings, {
-      as: 'settings'
+      as: 'settings',
     });
   };
   return users;
