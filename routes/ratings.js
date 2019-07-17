@@ -23,12 +23,18 @@ router.get('/', (req, res) => {
 });
 
 /* get count of ratings in specified intervals */
-router.post('/range', (req, res) => {
+router.post('/range', async (req, res) => {
     const {
         date,
         interval,
-        settingsId,
     } = req.body;
+
+    const settings = await model.settings.findOne({
+        order: [
+            ['createdAt', 'DESC'],
+        ],
+        raw: true,
+    });
 
 
     const promises = [];
@@ -46,7 +52,7 @@ router.post('/range', (req, res) => {
 
         promises.push(model.ratings.findAll({
             where: {
-                settingId: settingsId,
+                settingId: settings.id,
                 time: {
                     [Op.gte]: new Date(`${date}T${j}:00:00.000Z`),
                     [Op.lt]: new Date(`${date}T${z}:00:00.000Z`),
@@ -77,6 +83,68 @@ router.post('/range', (req, res) => {
     });
 });
 
+router.post('/days', async (req, res) => {
+    const {
+        startDate,
+        endDate,
+    } = req.body;
+
+    const settings = await model.settings.findOne({
+        order: [
+            ['createdAt', 'DESC'],
+        ],
+        raw: true,
+    });
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+
+    const promises = [];
+
+    while (start <= end) {
+        let month = start.getMonth() + 1;
+        if (month < 10) {
+            month = `0${month}`;
+        }
+        let day = start.getDate();
+        if (day < 10) {
+            day = `0${day}`;
+        }
+        const date = `${start.getFullYear()}-${month}-${day}`;
+        promises.push(model.ratings.findAll({
+            where: {
+                settingId: settings.id,
+                time: {
+                    [Op.startsWith]: date,
+                },
+            },
+            attributes: [
+                'emoticonId',
+                [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
+                [sequelize.fn('date', date), 'date'],
+
+            ],
+            group: ['emoticonId'],
+            include: [{
+                model: model.emoticons,
+                attributes: ['name', 'symbol', 'value'],
+            }],
+            raw: true,
+        }));
+
+        start.setDate(start.getDate() + 1);
+    }
+
+    Promise.all(promises).then((result) => {
+        res.json({
+            error: false,
+            data: result,
+        });
+    });
+});
+
+
 router.post('/report', (req, res) => {
     const {
         startDate,
@@ -91,7 +159,7 @@ router.post('/report', (req, res) => {
                 settingId: settingsId,
                 time: {
                     [Op.gte]: new Date(`${startDate}T00:00:00.000Z`),
-                    [Op.lt]: new Date(`${endDate}T23:59:59.999Z`),
+                    [Op.lte]: new Date(`${endDate}T23:59:59.999Z`),
                 },
             },
             include: [{
@@ -140,7 +208,7 @@ router.post('/count', (req, res) => {
             group: ['emoticonId'],
             include: [{
                 model: model.emoticons,
-                attributes: ['name', 'symbol'],
+                attributes: ['name', 'symbol', 'value'],
             }],
             raw: true,
         })
