@@ -1,25 +1,25 @@
 [{
         "model": "emoticonsGroups",
         "data": {
-            "name": "Stars"
+            "name": "stars"
         }
     },
     {
         "model": "emoticonsGroups",
         "data": {
-            "name": "Smileys"
+            "name": "hearts"
         }
     },
     {
         "model": "emoticonsGroups",
         "data": {
-            "name": "Numbers"
+            "name": "thumbs"
         }
     },
     {
         "model": "emoticonsGroups",
         "data": {
-            "name": "Thumbs"
+            "name": "smileys"
         }
     }
 ]

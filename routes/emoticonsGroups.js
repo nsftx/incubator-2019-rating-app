@@ -8,11 +8,14 @@ const model = require('../models/index');
 router.get('/', (req, res) => {
   model.emoticonsGroups.findAll({
       include: [model.emoticons],
+      order: [
+        ['id', 'DESC'],
+      ],
+      limit: 4,
     })
     .then(emoticonsGroups => res.json({
       error: false,
       data: emoticonsGroups,
-
     }))
     .catch(error => res.json({
       error: true,
