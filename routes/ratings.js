@@ -30,12 +30,25 @@ router.post('/range', async (req, res) => {
     } = req.body;
 
     const settings = await model.settings.findOne({
-        order: [
-            ['createdAt', 'DESC'],
-        ],
+            order: [
+                ['createdAt', 'DESC'],
+            ],
+            raw: true,
+        })
+        .then(setting => setting)
+        .catch(error => res.json({
+            error: true,
+            message: error,
+        }));
+
+
+    const emoticons = await model.emoticons.findAll({
+        where: {
+            emoticonsGroupId: settings.emoticonsGroupId,
+        },
+        attributes: ['name', 'value', 'symbol'],
         raw: true,
     });
-
 
     const promises = [];
 
@@ -70,15 +83,15 @@ router.post('/range', async (req, res) => {
                 model: model.emoticons,
                 attributes: ['name', 'symbol', 'value'],
             }],
-            raw: true,
         }));
     }
 
     Promise.all(promises).then((result) => {
-        /* const filtered = result.filter(el => el.length > 0); */
+        const filtered = result.filter(el => el.length > 0);
         res.json({
             error: false,
-            data: result,
+            data: filtered,
+            emoticons,
         });
     });
 });
@@ -93,6 +106,14 @@ router.post('/days', async (req, res) => {
         order: [
             ['createdAt', 'DESC'],
         ],
+        raw: true,
+    });
+
+    const emoticons = await model.emoticons.findAll({
+        where: {
+            emoticonsGroupId: settings.emoticonsGroupId,
+        },
+        attributes: ['name', 'value', 'symbol'],
         raw: true,
     });
 
@@ -130,33 +151,47 @@ router.post('/days', async (req, res) => {
                 model: model.emoticons,
                 attributes: ['name', 'symbol', 'value'],
             }],
-            raw: true,
         }));
 
         start.setDate(start.getDate() + 1);
     }
 
     Promise.all(promises).then((result) => {
+        const filtered = result.filter(el => el.length > 0);
         res.json({
             error: false,
-            data: result,
+            data: filtered,
+            emoticons,
         });
     });
 });
 
 
-router.post('/report', (req, res) => {
+router.post('/report', async (req, res) => {
     const {
         startDate,
         endDate,
-        settingsId,
     } = req.body;
+
+    const settings = await model.settings.findOne({
+        order: [
+            ['createdAt', 'DESC'],
+        ],
+        raw: true,
+    });
+
+    const emoticons = await model.emoticons.findAll({
+        where: {
+            emoticonsGroupId: settings.emoticonsGroupId,
+        },
+        attributes: ['name', 'value', 'symbol'],
+        raw: true,
+    });
 
 
     model.ratings.findAll({
-
             where: {
-                settingId: settingsId,
+                settingId: settings.id,
                 time: {
                     [Op.gte]: new Date(`${startDate}T00:00:00.000Z`),
                     [Op.lte]: new Date(`${endDate}T23:59:59.999Z`),
@@ -176,6 +211,7 @@ router.post('/report', (req, res) => {
         .then(count => res.json({
             error: false,
             data: count,
+            emoticons,
         }))
         .catch(error => res.json({
             error: true,
