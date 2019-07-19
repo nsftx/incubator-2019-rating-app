@@ -46,7 +46,7 @@ router.post('/range', async (req, res) => {
         where: {
             emoticonsGroupId: settings.emoticonsGroupId,
         },
-        attributes: ['name', 'value', 'symbol'],
+        attributes: ['id', 'name', 'value', 'symbol'],
         raw: true,
     });
 
@@ -72,25 +72,46 @@ router.post('/range', async (req, res) => {
                 },
             },
             attributes: [
-                [sequelize.fn('timestamp', new Date(`${date}T${j}:00:00.000Z`)), 'start'],
-                [sequelize.fn('timestamp', new Date(`${date}T${z}:00:00.000Z`)), 'end'],
+                /* [sequelize.fn('time', new Date(`${date}T${j}:00:00.000Z`)), 'start'],
+                [sequelize.fn('time', new Date(`${date}T${z}:00:00.000Z`)), 'end'], */
                 'emoticonId',
                 [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
 
             ],
             group: ['emoticonId'],
-            include: [{
-                model: model.emoticons,
-                attributes: ['name', 'symbol', 'value'],
-            }],
+            raw: true,
         }));
     }
 
+    const dataArray = [];
+
     Promise.all(promises).then((result) => {
-        const filtered = result.filter(el => el.length > 0);
+        /* const filtered = result.filter(el => el.length > 0); */
+        for (let i = 0; i < 24; i += interval) {
+            let z = String(i + interval);
+            let j = String(i);
+
+            if (i < 10) {
+                j = `0${j}`;
+            }
+            if (i + interval < 10) {
+                z = `0${z}`;
+            }
+
+            const data = {
+                /* start: `${date} ${j}:00:00`, */
+                end: `${z}:00:00`,
+            };
+            dataArray.push(data);
+        }
+
+        for (let i = 0; i < result.length; i += 1) {
+            dataArray[i].ratings = result[i];
+        }
+
         res.json({
             error: false,
-            data: filtered,
+            data: dataArray,
             emoticons,
         });
     });
