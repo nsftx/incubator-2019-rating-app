@@ -100,7 +100,7 @@ router.post('/range', async (req, res) => {
 
             const data = {
                 /* start: `${date} ${j}:00:00`, */
-                end: `${z}:00:00`,
+                end: `${date} ${z}:00:00`,
             };
             dataArray.push(data);
         }
@@ -138,7 +138,7 @@ router.post('/days', async (req, res) => {
         raw: true,
     });
 
-    const start = new Date(startDate);
+    let start = new Date(startDate);
     const end = new Date(endDate);
 
 
@@ -164,24 +164,45 @@ router.post('/days', async (req, res) => {
             attributes: [
                 'emoticonId',
                 [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
-                [sequelize.fn('date', date), 'date'],
-
             ],
             group: ['emoticonId'],
-            include: [{
-                model: model.emoticons,
-                attributes: ['name', 'symbol', 'value'],
-            }],
+
+            raw: true,
         }));
 
         start.setDate(start.getDate() + 1);
     }
 
+    const dataArray = [];
+
     Promise.all(promises).then((result) => {
-        const filtered = result.filter(el => el.length > 0);
+        // const filtered = result.filter(el => el.length > 0);
+        start = new Date(startDate);
+        while (start <= end) {
+            let month = start.getMonth() + 1;
+            if (month < 10) {
+                month = `0${month}`;
+            }
+            let day = start.getDate();
+            if (day < 10) {
+                day = `0${day}`;
+            }
+            const date = `${start.getFullYear()}-${month}-${day}`;
+
+            const data = {
+                date,
+            };
+            dataArray.push(data);
+
+            start.setDate(start.getDate() + 1);
+        }
+        for (let i = 0; i < result.length; i += 1) {
+            dataArray[i].ratings = result[i];
+        }
+
         res.json({
             error: false,
-            data: filtered,
+            data: dataArray,
             emoticons,
         });
     });
@@ -337,7 +358,6 @@ router.post('/many', async (req, res) => {
 router.post('/', async (req, res) => {
     const {
         emoticonId,
-        settingId,
     } = req.body;
 
     const emoticon = await model.emoticons.findOne({
@@ -348,9 +368,9 @@ router.post('/', async (req, res) => {
     });
 
     const settings = await model.settings.findOne({
-        where: {
-            id: settingId,
-        },
+        order: [
+            ['createdAt', 'DESC'],
+        ],
         raw: true,
     });
 
