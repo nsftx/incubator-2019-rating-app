@@ -28,6 +28,10 @@ module.exports = {
         type: Sequelize.BIGINT,
         allowNull: false,
       }, */
+      /* image: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      }, */
       createdAt: {
         type: 'TIMESTAMP',
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
