@@ -100,7 +100,7 @@ router.post('/range', async (req, res) => {
 
             const data = {
                 /* start: `${date} ${j}:00:00`, */
-                end: `${date} ${z}:00:00`,
+                time: `${date} ${z}:00:00`,
             };
             dataArray.push(data);
         }
@@ -190,7 +190,7 @@ router.post('/days', async (req, res) => {
             const date = `${start.getFullYear()}-${month}-${day}`;
 
             const data = {
-                date,
+                time: date,
             };
             dataArray.push(data);
 

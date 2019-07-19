@@ -177,7 +177,8 @@ router.put('/:id', async (req, res) => {
 	const old = await model.settings.findOne({
 		where: {
 			id: settingsId,
-			emoticonNumber: req.body.emoticonNumber,
+			emoticonNumber,
+			emoticonsGroupId,
 		},
 		raw: true,
 	});
