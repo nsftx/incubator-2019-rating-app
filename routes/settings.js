@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
 		}));
 });
 
-router.get('/last', (req, res) => {
+router.get('/last', async (req, res) => {
 	model.settings.findOne({
 			order: [
 				['createdAt', 'DESC'],
@@ -43,25 +43,47 @@ router.get('/last', (req, res) => {
 					as: 'message',
 					attributes: ['id', 'text', 'language'],
 				},
-				{
-					model: model.users,
-					attributes: ['id', 'first_name', 'last_name'],
 
-				},
 			],
 		})
-		.then(
-			settings => res.json({
+		.then(async (settings) => {
+			const emoticons = await model.emoticons.findAll({
+				where: {
+					emoticonsGroupId: settings.emoticonsGroupId,
+				},
+				attributes: ['id', 'name', 'value', 'symbol'],
+			});
+			let filteredEmoticons = [];
+			if (settings.emoticonNumber === 3) {
+				for (let i = 0; i < emoticons.length; i += 2) {
+					filteredEmoticons.push(emoticons[i]);
+				}
+			} else if (settings.emoticonNumber === 4) {
+				const middleElementIndex = parseInt(emoticons.length / 2, 10);
+				for (let i = 0; i < emoticons.length; i += 1) {
+					if (i !== middleElementIndex) {
+						filteredEmoticons.push(emoticons[i]);
+					}
+				}
+			} else {
+				filteredEmoticons = emoticons;
+			}
+			res.json({
 				error: false,
 				data: settings,
-			}),
-		)
+				emoticons: filteredEmoticons,
+			});
+		})
 		.catch(error => res.json({
 			error: true,
 			data: [],
 			message: error,
 		}));
 });
+/*  res.json({
+				error: false,
+				data: settings,
+			}) */
 
 router.get('/:id', (req, res) => {
 	const settingsId = req.params.id;
