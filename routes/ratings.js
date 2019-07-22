@@ -7,6 +7,35 @@ const model = require('../models/index');
 // eslint-disable-next-line prefer-destructuring
 const Op = sequelize.Op;
 
+
+const getCurrentSettings = () => {
+    const settings = model.settings.findOne({
+        order: [
+            ['createdAt', 'DESC'],
+        ],
+        raw: true,
+    });
+    return settings;
+};
+
+const getEmoticons = async (groupId) => {
+    const emoticons = await model.emoticons.findAll({
+        where: {
+            emoticonsGroupId: groupId,
+        },
+        attributes: ['id', 'name', 'value', 'symbol'],
+        raw: true,
+    });
+    return emoticons;
+};
+router.get('/test', async (req, res) => {
+    const data = await getCurrentSettings();
+    res.json({
+        error: false,
+        data,
+    });
+});
+
 /* GET all ratings. */
 router.get('/', (req, res) => {
     model.ratings.findAll({
@@ -29,26 +58,8 @@ router.post('/range', async (req, res) => {
         interval,
     } = req.body;
 
-    const settings = await model.settings.findOne({
-            order: [
-                ['createdAt', 'DESC'],
-            ],
-            raw: true,
-        })
-        .then(setting => setting)
-        .catch(error => res.json({
-            error: true,
-            message: error,
-        }));
-
-
-    const emoticons = await model.emoticons.findAll({
-        where: {
-            emoticonsGroupId: settings.emoticonsGroupId,
-        },
-        attributes: ['id', 'name', 'value', 'symbol'],
-        raw: true,
-    });
+    const settings = await getCurrentSettings();
+    const emoticons = await getEmoticons(settings.emoticonsGroupId);
 
     const promises = [];
 
@@ -64,23 +75,28 @@ router.post('/range', async (req, res) => {
         }
 
         promises.push(model.ratings.findAll({
-            where: {
-                settingId: settings.id,
-                time: {
-                    [Op.gte]: new Date(`${date}T${j}:00:00.000Z`),
-                    [Op.lt]: new Date(`${date}T${z}:00:00.000Z`),
+                where: {
+                    settingId: settings.id,
+                    time: {
+                        [Op.gte]: new Date(`${date}T${j}:00:00.000Z`),
+                        [Op.lt]: new Date(`${date}T${z}:00:00.000Z`),
+                    },
                 },
-            },
-            attributes: [
-                /* [sequelize.fn('time', new Date(`${date}T${j}:00:00.000Z`)), 'start'],
-                [sequelize.fn('time', new Date(`${date}T${z}:00:00.000Z`)), 'end'], */
-                'emoticonId',
-                [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
+                attributes: [
+                    /* [sequelize.fn('time', new Date(`${date}T${j}:00:00.000Z`)), 'start'],
+                    [sequelize.fn('time', new Date(`${date}T${z}:00:00.000Z`)), 'end'], */
+                    'emoticonId',
+                    [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
 
-            ],
-            group: ['emoticonId'],
-            raw: true,
-        }));
+                ],
+                group: ['emoticonId'],
+                raw: true,
+            })
+            .then(setting => setting)
+            .catch(error => res.json({
+                error: true,
+                message: error,
+            })));
     }
 
     const dataArray = [];
@@ -123,20 +139,8 @@ router.post('/days', async (req, res) => {
         endDate,
     } = req.body;
 
-    const settings = await model.settings.findOne({
-        order: [
-            ['createdAt', 'DESC'],
-        ],
-        raw: true,
-    });
-
-    const emoticons = await model.emoticons.findAll({
-        where: {
-            emoticonsGroupId: settings.emoticonsGroupId,
-        },
-        attributes: ['name', 'value', 'symbol'],
-        raw: true,
-    });
+    const settings = await getCurrentSettings();
+    const emoticons = await getEmoticons(settings.emoticonsGroupId);
 
     let start = new Date(startDate);
     const end = new Date(endDate);
@@ -155,20 +159,26 @@ router.post('/days', async (req, res) => {
         }
         const date = `${start.getFullYear()}-${month}-${day}`;
         promises.push(model.ratings.findAll({
-            where: {
-                settingId: settings.id,
-                time: {
-                    [Op.startsWith]: date,
+                where: {
+                    settingId: settings.id,
+                    time: {
+                        [Op.startsWith]: date,
+                    },
                 },
-            },
-            attributes: [
-                'emoticonId',
-                [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
-            ],
-            group: ['emoticonId'],
+                attributes: [
+                    'emoticonId',
+                    [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
+                ],
+                group: ['emoticonId'],
 
-            raw: true,
-        }));
+                raw: true,
+            })
+            .then(ratings => ratings)
+            .catch(error => res.json({
+                error: true,
+                message: error,
+            })));
+
 
         start.setDate(start.getDate() + 1);
     }
@@ -215,20 +225,8 @@ router.post('/report', async (req, res) => {
         endDate,
     } = req.body;
 
-    const settings = await model.settings.findOne({
-        order: [
-            ['createdAt', 'DESC'],
-        ],
-        raw: true,
-    });
-
-    const emoticons = await model.emoticons.findAll({
-        where: {
-            emoticonsGroupId: settings.emoticonsGroupId,
-        },
-        attributes: ['name', 'value', 'symbol'],
-        raw: true,
-    });
+    const settings = await getCurrentSettings();
+    const emoticons = await getEmoticons(settings.emoticonsGroupId);
 
 
     model.ratings.findAll({
@@ -264,16 +262,17 @@ router.post('/report', async (req, res) => {
 
 
 /* get count of ratings in one day */
-router.post('/count', (req, res) => {
+router.post('/count', async (req, res) => {
     const {
         date,
-        settingsId,
     } = req.body;
 
 
+    const settings = await getCurrentSettings();
+
     model.ratings.findAll({
             where: {
-                settingId: settingsId,
+                settingId: settings.id,
                 time: {
                     [Op.startsWith]: date,
                 },
@@ -327,21 +326,20 @@ router.post('/many', async (req, res) => {
         ratingsArray,
     } = req.body;
 
-    const settings = await model.settings.findOne({
-        order: [
-            ['createdAt', 'DESC'],
-        ],
-        raw: true,
-    });
+    const settings = getCurrentSettings();
 
     const promises = [];
 
     ratingsArray.forEach((rating) => {
         promises.push(model.ratings.create({
-            emoticonId: rating.emoticonId,
-            time: Date(),
-            settingId: settings.id,
-        }));
+                emoticonId: rating.emoticonId,
+                time: Date(),
+                settingId: settings.id,
+            }).then(ratings => ratings)
+            .catch(error => res.json({
+                error: true,
+                message: error,
+            })));
     });
 
     Promise.all(promises).then((result) => {
@@ -367,12 +365,7 @@ router.post('/', async (req, res) => {
         raw: true,
     });
 
-    const settings = await model.settings.findOne({
-        order: [
-            ['createdAt', 'DESC'],
-        ],
-        raw: true,
-    });
+    const settings = getCurrentSettings();
 
     if (emoticon.emoticonsGroupId !== settings.emoticonsGroupId) {
         res.json({
@@ -425,40 +418,3 @@ router.put('/:id', (req, res) => {
 
 
 module.exports = router;
-
-/* router.get('/counts', (req, res) => {
-    model.ratings.findAll({
-        attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
-            group: ['emoticonId'],
-            raw: true,
-        })
-        .then(ratings => res.json({
-            error: false,
-            data: ratings,
-        }))
-        .catch(error => res.json({
-            error: true,
-            data: [],
-            message: error,
-        }));
-}); */
-
-/* router.get('/counts/:settingId', (req, res) => {
-    const setting = req.params.settingId;
-    model.ratings.findAll({
-        attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
-            where: {
-                settingId: setting,
-            },
-            group: ['emoticonId'],
-            raw: true,
-        }).then(ratings => res.json({
-            error: false,
-            data: ratings,
-        }))
-        .catch(error => res.json({
-            error: true,
-            data: [],
-            message: error,
-        }));
-}); */

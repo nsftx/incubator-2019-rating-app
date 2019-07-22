@@ -52,6 +52,7 @@ router.get('/last', async (req, res) => {
 					emoticonsGroupId: settings.emoticonsGroupId,
 				},
 				attributes: ['id', 'name', 'value', 'symbol'],
+				raw: true,
 			});
 			let filteredEmoticons = [];
 			if (settings.emoticonNumber === 3) {
@@ -60,11 +61,8 @@ router.get('/last', async (req, res) => {
 				}
 			} else if (settings.emoticonNumber === 4) {
 				const middleElementIndex = parseInt(emoticons.length / 2, 10);
-				for (let i = 0; i < emoticons.length; i += 1) {
-					if (i !== middleElementIndex) {
-						filteredEmoticons.push(emoticons[i]);
-					}
-				}
+				filteredEmoticons = emoticons;
+				emoticons.splice(middleElementIndex, 1);
 			} else {
 				filteredEmoticons = emoticons;
 			}
@@ -80,10 +78,6 @@ router.get('/last', async (req, res) => {
 			message: error,
 		}));
 });
-/*  res.json({
-				error: false,
-				data: settings,
-			}) */
 
 router.get('/:id', (req, res) => {
 	const settingsId = req.params.id;
@@ -102,14 +96,35 @@ router.get('/:id', (req, res) => {
 					attributes: ['id', 'name'],
 				}, {
 					model: model.users,
-
 				},
 			],
 		})
-		.then(settings => res.json({
-			error: false,
-			data: settings,
-		}))
+		.then(async (settings) => {
+			const emoticons = await model.emoticons.findAll({
+				where: {
+					emoticonsGroupId: settings.emoticonsGroupId,
+				},
+				attributes: ['id', 'name', 'value', 'symbol'],
+				raw: true,
+			});
+			let filteredEmoticons = [];
+			if (settings.emoticonNumber === 3) {
+				for (let i = 0; i < emoticons.length; i += 2) {
+					filteredEmoticons.push(emoticons[i]);
+				}
+			} else if (settings.emoticonNumber === 4) {
+				const middleElementIndex = parseInt(emoticons.length / 2, 10);
+				filteredEmoticons = emoticons;
+				emoticons.splice(middleElementIndex, 1);
+			} else {
+				filteredEmoticons = emoticons;
+			}
+			res.json({
+				error: false,
+				data: settings,
+				emoticons: filteredEmoticons,
+			});
+		})
 		.catch(error => res.json({
 			error: true,
 			message: error,
@@ -197,13 +212,18 @@ router.put('/:id', async (req, res) => {
 
 	// if emoticonNumber not changed
 	const old = await model.settings.findOne({
-		where: {
-			id: settingsId,
-			emoticonNumber,
-			emoticonsGroupId,
-		},
-		raw: true,
-	});
+			where: {
+				id: settingsId,
+				emoticonNumber,
+				emoticonsGroupId,
+			},
+			raw: true,
+		})
+		.then(setting => setting)
+		.catch(error => res.json({
+			error: true,
+			message: error,
+		}));
 
 	// if emoticonNumber not changed => update, else => create new
 	if (old !== null) {
