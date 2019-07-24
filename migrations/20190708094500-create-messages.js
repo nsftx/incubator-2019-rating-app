@@ -1,4 +1,3 @@
-'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('messages', {
@@ -6,33 +5,33 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       text: {
         allowNull: false,
         type: Sequelize.STRING(120),
-        defaultValue: "Thank you for your rating!",
+        defaultValue: 'Thank you for your rating!',
       },
       language: {
         allowNull: false,
         type: Sequelize.STRING(30),
-        defaultValue: "English (UK)"
+        defaultValue: 'en',
       },
       createdAt: {
         type: 'TIMESTAMP',
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-        allowNull: false
+        allowNull: false,
 
       },
       updatedAt: {
         type: 'TIMESTAMP',
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
-        allowNull: false
+        allowNull: false,
 
-      }
+      },
     });
   },
   down: (queryInterface) => {
     return queryInterface.dropTable('messages');
-  }
+  },
 };

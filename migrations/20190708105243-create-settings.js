@@ -1,4 +1,3 @@
-'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('settings', {
@@ -6,62 +5,63 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       emoticonNumber: {
         allowNull: false,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        defaultValue: 3,
       },
       messageId: {
         type: Sequelize.INTEGER,
         references: {
           model: {
-            tableName: 'messages'
+            tableName: 'messages',
           },
-          key: 'id'
+          key: 'id',
         },
-        allowNull: false
+        allowNull: true,
       },
       emoticonsGroupId: {
         type: Sequelize.INTEGER,
         references: {
           model: {
-            tableName: 'emoticonsGroups'
+            tableName: 'emoticonsGroups',
           },
-          key: 'id'
+          key: 'id',
         },
-        allowNull: false
+        allowNull: false,
       },
       userId: {
         type: Sequelize.INTEGER,
         references: {
           model: {
-            tableName: 'users'
+            tableName: 'users',
           },
-          key: 'id'
+          key: 'id',
         },
-        allowNull: false
+        allowNull: false,
       },
       messageTimeout: {
         allowNull: false,
         type: Sequelize.INTEGER,
-        defaultValue: 5
+        defaultValue: 5,
       },
       createdAt: {
         type: 'TIMESTAMP',
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-        allowNull: false
+        allowNull: false,
 
       },
       updatedAt: {
         type: 'TIMESTAMP',
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
-        allowNull: false
+        allowNull: false,
 
-      }
+      },
     });
   },
   down: (queryInterface) => {
     return queryInterface.dropTable('settings');
-  }
+  },
 };
