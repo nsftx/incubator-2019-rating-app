@@ -2,6 +2,8 @@ const express = require('express');
 const sequelize = require('sequelize');
 
 const router = express.Router();
+const request = require('request-promise');
+const moment = require('moment');
 const model = require('../models/index');
 
 // eslint-disable-next-line prefer-destructuring
@@ -28,13 +30,73 @@ const getEmoticons = async (groupId) => {
     });
     return emoticons;
 };
-router.get('/test', async (req, res) => {
-    const data = await getCurrentSettings();
-    res.json({
-        error: false,
-        data,
+
+const slackPush = (averageRating) => {
+    const hook = 'https://hooks.slack.com/services/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';
+    console.log('slack');
+    const avg = averageRating.toFixed(2);
+    (async () => {
+        try {
+            // post to slack
+            const slackBody = {
+                text: `Ratings too low! \nAverage rating = ${avg}`,
+            };
+
+            const res = await request({
+                url: hook,
+                method: 'POST',
+                body: slackBody,
+                json: true,
+            });
+            console.log(res);
+        } catch (error) {
+            console.log('error', error);
+        }
+    })();
+};
+
+
+const checkRatingsStatus = async (settings) => {
+    const datum = new Date();
+    const date = moment(String(datum)).format('YYYY-MM-DD');
+    console.log(date);
+    const count = await model.ratings.findOne({
+        where: {
+            settingId: settings.id,
+            time: {
+                [Op.startsWith]: date,
+            },
+        },
+        attributes: [
+            [sequelize.fn('count', sequelize.col('id')), 'count'],
+        ],
+        raw: true,
+
     });
-});
+    const sum = await model.ratings.findOne({
+        where: {
+            settingId: settings.id,
+            time: {
+                [Op.startsWith]: date,
+            },
+        },
+        include: [{
+            model: model.emoticons,
+            attributes: [
+                [sequelize.fn('sum', sequelize.col('value')), 'sum'],
+            ],
+            required: true,
+        }],
+        attributes: [],
+        raw: true,
+    });
+    const averageRating = sum['emoticon.sum'] / count.count;
+    console.log(sum['emoticon.sum'], count.count);
+    console.log('Average rating:', averageRating);
+    if (count.count > 200 && averageRating < 3.5) {
+        await slackPush(averageRating);
+    }
+};
 
 /* GET all ratings. */
 router.get('/', (req, res) => {
@@ -239,7 +301,7 @@ router.post('/report', async (req, res) => {
             },
             include: [{
                 model: model.emoticons,
-                attributes: ['name', 'symbol', 'value'],
+                attributes: ['id', 'name', 'symbol', 'value'],
             }],
             attributes: [
                 'emoticonId',
@@ -285,7 +347,7 @@ router.post('/count', async (req, res) => {
             group: ['emoticonId'],
             include: [{
                 model: model.emoticons,
-                attributes: ['name', 'symbol', 'value'],
+                attributes: ['id', 'name', 'symbol', 'value'],
             }],
             raw: true,
         })
@@ -326,7 +388,7 @@ router.post('/many', async (req, res) => {
         ratingsArray,
     } = req.body;
 
-    const settings = getCurrentSettings();
+    const settings = await getCurrentSettings();
 
     const promises = [];
 
@@ -365,7 +427,7 @@ router.post('/', async (req, res) => {
         raw: true,
     });
 
-    const settings = getCurrentSettings();
+    const settings = await getCurrentSettings();
 
     if (emoticon.emoticonsGroupId !== settings.emoticonsGroupId) {
         res.json({
@@ -383,6 +445,9 @@ router.post('/', async (req, res) => {
                 data: ratings,
                 message: 'New reaction have been added.',
             }))
+            .then(() => {
+                checkRatingsStatus(settings);
+            })
             .catch(error => res.json({
                 error: true,
                 message: error,
