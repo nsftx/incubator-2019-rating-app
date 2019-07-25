@@ -12,6 +12,7 @@ const ratingsRouter = require('./routes/ratings');
 const messagesRouter = require('./routes/messages');
 const emoticonsRouter = require('./routes/emoticons');
 const emoticonsGroupsRouter = require('./routes/emoticonsGroups');
+const InvitesRouter = require('./routes/invites');
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use('/ratings', ratingsRouter);
 app.use('/messages', messagesRouter);
 app.use('/emoticons', emoticonsRouter);
 app.use('/emoticonsGroups', emoticonsGroupsRouter);
+app.use('/invites', InvitesRouter);
 
 
 // catch 404 and forward to error handler

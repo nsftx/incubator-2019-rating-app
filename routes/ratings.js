@@ -60,7 +60,7 @@ const checkRatingsStatus = async (settings) => {
     const datum = new Date();
     const date = moment(String(datum)).format('YYYY-MM-DD');
     console.log(date);
-    const count = await model.ratings.findOne({
+    const ratingsCount = await model.ratings.findOne({
         where: {
             settingId: settings.id,
             time: {
@@ -90,11 +90,14 @@ const checkRatingsStatus = async (settings) => {
         attributes: [],
         raw: true,
     });
-    const averageRating = sum['emoticon.sum'] / count.count;
-    console.log(sum['emoticon.sum'], count.count);
+    const averageRating = sum['emoticon.sum'] / ratingsCount.count;
+    console.log(sum['emoticon.sum'], ratingsCount.count);
     console.log('Average rating:', averageRating);
-    if (count.count > 200 && averageRating < 3.5) {
-        await slackPush(averageRating);
+    if (ratingsCount.count > 200 && averageRating < 3.5) {
+        // to avoid spam in slack check every 50th rating in day
+        if (ratingsCount.count % 50 === 0) {
+            await slackPush(averageRating);
+        }
     }
 };
 

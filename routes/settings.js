@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 					attributes: ['id', 'name'],
 				}, {
 					model: model.users,
-					attributes: ['id', 'first_name', 'last_name'],
+					attributes: ['id', 'firstName', 'lastName'],
 				},
 			],
 		})
