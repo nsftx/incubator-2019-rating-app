@@ -25,51 +25,46 @@ router.post('/login', (req, res) => {
 	}).then((currentUser) => {
 		if (currentUser) {
 			// console.log('user is: ', currentUser);
-			res.json({
+			return res.json({
 				error: false,
 				existingUser: true,
 				data: currentUser,
 			});
-		} else {
-			model.invites.findOne({
-				where: {
-					email,
-				},
-			}).then((existingInvite) => {
-				console.log('invite');
-				if (existingInvite) {
-					console.log('inviteExists');
-					model.users.create({
-						googleId: sub,
-						firstName: given_name,
-						lastName: family_name,
-						email,
-						image: picture,
-					}).then((newUser) => {
-						// console.log('created new user: ', newUser);
-						res.json({
-							error: false,
-							existingUser: false,
-							data: newUser,
-						});
-					}).catch(error => res.json({
-						error: true,
-						data: [],
-						message: error,
-					}));
-				} else {
-					res.json({
-						error: true,
-						data: [],
-						message: 'Invitation for user does not exist',
-					});
-				}
+		}
+		model.invites.findOne({
+			where: {
+				email,
+			},
+		}).then((existingInvite) => {
+			if (!existingInvite) {
+				return res.json({
+					error: true,
+					data: [],
+					message: 'Invitation for user does not exist',
+				});
+			}
+			model.users.create({
+				googleId: sub,
+				firstName: given_name,
+				lastName: family_name,
+				email,
+				image: picture,
+			}).then((newUser) => {
+				res.json({
+					error: false,
+					existingUser: false,
+					data: newUser,
+				});
 			}).catch(error => res.json({
 				error: true,
 				data: [],
 				message: error,
 			}));
-		}
+		}).catch(error => res.json({
+			error: true,
+			data: [],
+			message: error,
+		}));
 	}).catch(error => res.json({
 		error: true,
 		data: [],

@@ -33,7 +33,6 @@ const getEmoticons = async (groupId) => {
 
 const slackPush = (averageRating) => {
     const hook = 'https://hooks.slack.com/services/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';
-    console.log('slack');
     const avg = averageRating.toFixed(2);
     (async () => {
         try {
@@ -42,13 +41,12 @@ const slackPush = (averageRating) => {
                 text: `Ratings too low! \nAverage rating = ${avg}`,
             };
 
-            const res = await request({
+            await request({
                 url: hook,
                 method: 'POST',
                 body: slackBody,
                 json: true,
             });
-            console.log(res);
         } catch (error) {
             console.log('error', error);
         }
@@ -59,7 +57,6 @@ const slackPush = (averageRating) => {
 const checkRatingsStatus = async (settings) => {
     const datum = new Date();
     const date = moment(String(datum)).format('YYYY-MM-DD');
-    console.log(date);
     const ratingsCount = await model.ratings.findOne({
         where: {
             settingId: settings.id,
