@@ -4,6 +4,29 @@ const router = express.Router();
 const model = require('../models/index');
 
 
+const getEmoticonsForSettings = (emoticonsGroupId, emoticonNumber) => {
+	const emoticons = model.emoticons.findAll({
+		where: {
+			emoticonsGroupId,
+		},
+		attributes: ['id', 'name', 'value', 'symbol'],
+		raw: true,
+	});
+	let filteredEmoticons = [];
+	if (emoticonNumber === 3) {
+		for (let i = 0; i < emoticons.length; i += 2) {
+			filteredEmoticons.push(emoticons[i]);
+		}
+	} else if (emoticonNumber === 4) {
+		const middleElementIndex = parseInt(emoticons.length / 2, 10);
+		filteredEmoticons = emoticons;
+		emoticons.splice(middleElementIndex, 1);
+	} else {
+		filteredEmoticons = emoticons;
+	}
+	return filteredEmoticons;
+};
+
 router.get('/', async (req, res) => {
 	model.settings.findAll({
 			include: [{
@@ -47,25 +70,8 @@ router.get('/last', async (req, res) => {
 			],
 		})
 		.then(async (settings) => {
-			const emoticons = await model.emoticons.findAll({
-				where: {
-					emoticonsGroupId: settings.emoticonsGroupId,
-				},
-				attributes: ['id', 'name', 'value', 'symbol'],
-				raw: true,
-			});
-			let filteredEmoticons = [];
-			if (settings.emoticonNumber === 3) {
-				for (let i = 0; i < emoticons.length; i += 2) {
-					filteredEmoticons.push(emoticons[i]);
-				}
-			} else if (settings.emoticonNumber === 4) {
-				const middleElementIndex = parseInt(emoticons.length / 2, 10);
-				filteredEmoticons = emoticons;
-				emoticons.splice(middleElementIndex, 1);
-			} else {
-				filteredEmoticons = emoticons;
-			}
+			// eslint-disable-next-line max-len
+			const filteredEmoticons = await getEmoticonsForSettings(settings.emoticonsGroupId, settings.emoticonNumber);
 			res.json({
 				error: false,
 				data: settings,
@@ -181,7 +187,6 @@ router.post('/', (req, res) => {
 
 router.put('/:id', async (req, res) => {
 	const settingsId = req.params.id;
-
 	const {
 		emoticonNumber,
 		messageId,

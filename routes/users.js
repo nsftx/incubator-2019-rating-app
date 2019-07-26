@@ -2,6 +2,13 @@
 const express = require('express');
 
 const router = express.Router();
+
+const {
+	OAuth2Client,
+} = require('google-auth-library');
+
+const client = new OAuth2Client('641180167952-h84f394tnm50qm8j30t101cla1k2aglh.apps.googleusercontent.com');
+
 const model = require('../models/index');
 
 /* GET users listing. */
@@ -69,6 +76,30 @@ router.post('/login', (req, res) => {
 		error: true,
 		data: [],
 		message: error,
+	}));
+});
+
+router.post('/auth', (req, res) => {
+	const token = req.body.idToken;
+	async function verify() {
+		const ticket = await client.verifyIdToken({
+			idToken: token,
+			audience: '641180167952-h84f394tnm50qm8j30t101cla1k2aglh.apps.googleusercontent.com', // Specify the CLIENT_ID of the app that accesses the backend
+			// Or, if multiple clients access the backend:
+			//[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+		});
+		const payload = ticket.getPayload();
+		const userid = payload.sub;
+		return res.json({
+			user: payload,
+			userid,
+		});
+		// If request specified a G Suite domain:
+		//const domain = payload['hd'];
+	}
+	verify().catch(error => res.json({
+		error: 'User not found or token expired',
+		data: error,
 	}));
 });
 module.exports = router;
