@@ -4,8 +4,8 @@ const router = express.Router();
 const model = require('../models/index');
 
 
-const getEmoticonsForSettings = (emoticonsGroupId, emoticonNumber) => {
-	const emoticons = model.emoticons.findAll({
+const getEmoticonsForSettings = async (emoticonsGroupId, emoticonNumber) => {
+	const emoticons = await model.emoticons.findAll({
 		where: {
 			emoticonsGroupId,
 		},
@@ -194,6 +194,11 @@ router.put('/:id', async (req, res) => {
 		emoticonsGroupId,
 		userId,
 	} = req.body;
+	const objekt = {};
+	objekt.error = false;
+	objekt.data = req.body;
+	
+
 
 	if (typeof (emoticonNumber) !== 'undefined') {
 		if (emoticonNumber < 3 || emoticonNumber > 5) {
@@ -243,11 +248,20 @@ router.put('/:id', async (req, res) => {
 					id: settingsId,
 				},
 			})
-			.then(settings => res.json({
-				error: false,
-				data: settings,
-				message: 'Settings have been updated!',
-			}))
+			.then(async (settings) => {
+				
+				objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
+				console.log(objekt.emoticons);
+				const socket = require('socket.io-client')('http://localhost:6000');
+				socket.on('connect', ()=> {
+					socket.emit('settings', objekt);
+				});
+				res.json({
+					error: false,
+					data: settings,
+					message:'Settings have ben updated.',
+				});
+			} )
 			.catch(error => res.json({
 				error: true,
 				message: error,
@@ -260,11 +274,21 @@ router.put('/:id', async (req, res) => {
 				emoticonsGroupId,
 				userId,
 			})
-			.then(settings => res.status(201).json({
-				error: false,
-				data: settings,
-				message: 'New settings have been created.',
-			}))
+			.then(async (settings) => {
+				
+				objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
+				objekt.data = settings;
+				console.log(objekt.emoticons);
+				const socket = require('socket.io-client')('http://localhost:6000');
+				socket.on('connect', ()=> {
+					socket.emit('settings', objekt);
+				});
+				res.status(201).json({
+					error: false,
+					data: settings,
+					message:'Settings have ben created.',
+				});
+			} )
 			.catch(error => res.json({
 				error: true,
 
