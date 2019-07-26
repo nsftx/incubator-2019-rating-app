@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
 	res.send('respond with a resource');
 });
 
-router.post('/login', (req, res) => {
+router.post('/auth', (req, res) => {
 	const {
 		sub,
 		given_name,
@@ -79,23 +79,70 @@ router.post('/login', (req, res) => {
 	}));
 });
 
-router.post('/auth', (req, res) => {
+router.post('/login', (req, res) => {
 	const token = req.body.idToken;
 	async function verify() {
 		const ticket = await client.verifyIdToken({
 			idToken: token,
 			audience: '641180167952-h84f394tnm50qm8j30t101cla1k2aglh.apps.googleusercontent.com', // Specify the CLIENT_ID of the app that accesses the backend
 			// Or, if multiple clients access the backend:
-			//[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+			// [CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
 		});
 		const payload = ticket.getPayload();
-		const userid = payload.sub;
-		return res.json({
-			user: payload,
-			userid,
-		});
-		// If request specified a G Suite domain:
-		//const domain = payload['hd'];
+		const user = payload;
+
+		model.users.findOne({
+			where: {
+				googleId: user.sub,
+			},
+		}).then((currentUser) => {
+			if (currentUser) {
+				// console.log('user is: ', currentUser);
+				return res.json({
+					error: false,
+					existingUser: true,
+					data: currentUser,
+				});
+			}
+			model.invites.findOne({
+				where: {
+					email: user.email,
+				},
+			}).then((existingInvite) => {
+				if (!existingInvite) {
+					return res.json({
+						error: true,
+						data: [],
+						message: 'Invitation for user does not exist',
+					});
+				}
+				model.users.create({
+					googleId: user.sub,
+					firstName: user.given_name,
+					lastName: user.family_name,
+					email: user.email,
+					image: user.picture,
+				}).then((newUser) => {
+					res.json({
+						error: false,
+						existingUser: false,
+						data: newUser,
+					});
+				}).catch(error => res.json({
+					error: true,
+					data: [],
+					message: error,
+				}));
+			}).catch(error => res.json({
+				error: true,
+				data: [],
+				message: error,
+			}));
+		}).catch(error => res.json({
+			error: true,
+			data: [],
+			message: error,
+		}));
 	}
 	verify().catch(error => res.json({
 		error: 'User not found or token expired',
