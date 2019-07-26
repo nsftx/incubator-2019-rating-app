@@ -308,7 +308,6 @@ router.post('/report', async (req, res) => {
                 [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
             ],
             group: ['emoticonId'],
-
         })
         .then(count => res.json({
             error: false,
@@ -349,7 +348,6 @@ router.post('/count', async (req, res) => {
                 model: model.emoticons,
                 attributes: ['id', 'name', 'symbol', 'value'],
             }],
-            raw: true,
         })
         .then(count => res.json({
             error: false,
