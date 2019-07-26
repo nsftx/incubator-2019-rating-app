@@ -2,9 +2,101 @@ const express = require('express');
 const sequelize = require('sequelize');
 
 const router = express.Router();
+const request = require('request-promise');
+const moment = require('moment');
 const model = require('../models/index');
 
+// eslint-disable-next-line prefer-destructuring
 const Op = sequelize.Op;
+
+
+const getCurrentSettings = () => {
+    const settings = model.settings.findOne({
+        order: [
+            ['createdAt', 'DESC'],
+        ],
+        raw: true,
+    });
+    return settings;
+};
+
+const getEmoticons = async (groupId) => {
+    const emoticons = await model.emoticons.findAll({
+        where: {
+            emoticonsGroupId: groupId,
+        },
+        attributes: ['id', 'name', 'value', 'symbol'],
+        raw: true,
+    });
+    return emoticons;
+};
+
+const slackPush = (averageRating) => {
+    const hook = 'https://hooks.slack.com/services/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';
+    const avg = averageRating.toFixed(2);
+    (async () => {
+        try {
+            // post to slack
+            const slackBody = {
+                text: `Ratings too low! \nAverage rating = ${avg}`,
+            };
+
+            await request({
+                url: hook,
+                method: 'POST',
+                body: slackBody,
+                json: true,
+            });
+        } catch (error) {
+            console.log('error', error);
+        }
+    })();
+};
+
+
+const checkRatingsStatus = async (settings) => {
+    const datum = new Date();
+    const date = moment(String(datum)).format('YYYY-MM-DD');
+    const ratingsCount = await model.ratings.findOne({
+        where: {
+            settingId: settings.id,
+            time: {
+                [Op.startsWith]: date,
+            },
+        },
+        attributes: [
+            [sequelize.fn('count', sequelize.col('id')), 'count'],
+        ],
+        raw: true,
+
+    });
+    const sum = await model.ratings.findOne({
+        where: {
+            settingId: settings.id,
+            time: {
+                [Op.startsWith]: date,
+            },
+        },
+        include: [{
+            model: model.emoticons,
+            attributes: [
+                [sequelize.fn('sum', sequelize.col('value')), 'sum'],
+            ],
+            required: true,
+        }],
+        attributes: [],
+        raw: true,
+    });
+    const averageRating = sum['emoticon.sum'] / ratingsCount.count;
+    console.log(sum['emoticon.sum'], ratingsCount.count);
+    console.log('Average rating:', averageRating);
+    if (ratingsCount.count > 200 && averageRating < 3.5) {
+        // to avoid spam in slack check every 50th rating in day
+        if (ratingsCount.count % 50 === 0) {
+            await slackPush(averageRating);
+        }
+    }
+};
 
 /* GET all ratings. */
 router.get('/', (req, res) => {
@@ -22,13 +114,14 @@ router.get('/', (req, res) => {
 });
 
 /* get count of ratings in specified intervals */
-router.post('/range', (req, res) => {
+router.post('/range', async (req, res) => {
     const {
         date,
         interval,
-        settingsId,
     } = req.body;
 
+    const settings = await getCurrentSettings();
+    const emoticons = await getEmoticons(settings.emoticonsGroupId);
 
     const promises = [];
 
@@ -44,58 +137,171 @@ router.post('/range', (req, res) => {
         }
 
         promises.push(model.ratings.findAll({
-            where: {
-                settingId: settingsId,
-                time: {
-                    [Op.gte]: new Date(`${date}T${j}:00:00.000Z`),
-                    [Op.lt]: new Date(`${date}T${z}:00:00.000Z`),
+                where: {
+                    settingId: settings.id,
+                    time: {
+                        [Op.gte]: new Date(`${date}T${j}:00:00.000Z`),
+                        [Op.lt]: new Date(`${date}T${z}:00:00.000Z`),
+                    },
                 },
-            },
-            attributes: [
-                [sequelize.fn('timestamp', new Date(`${date}T${j}:00:00.000Z`)), 'start'],
-                [sequelize.fn('timestamp', new Date(`${date}T${z}:00:00.000Z`)), 'end'],
-                'emoticonId',
-                [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
+                attributes: [
+                    /* [sequelize.fn('time', new Date(`${date}T${j}:00:00.000Z`)), 'start'],
+                    [sequelize.fn('time', new Date(`${date}T${z}:00:00.000Z`)), 'end'], */
+                    'emoticonId',
+                    [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
 
-            ],
-            group: ['emoticonId'],
-            include: [{
-                model: model.emoticons,
-                attributes: ['name', 'symbol', 'value'],
-            }],
-            raw: true,
-        }));
+                ],
+                group: ['emoticonId'],
+                raw: true,
+            })
+            .then(setting => setting)
+            .catch(error => res.json({
+                error: true,
+                message: error,
+            })));
     }
+
+    const dataArray = [];
 
     Promise.all(promises).then((result) => {
         /* const filtered = result.filter(el => el.length > 0); */
+        for (let i = 0; i < 24; i += interval) {
+            let z = String(i + interval);
+            let j = String(i);
+
+            if (i < 10) {
+                j = `0${j}`;
+            }
+            if (i + interval < 10) {
+                z = `0${z}`;
+            }
+
+            const data = {
+                /* start: `${date} ${j}:00:00`, */
+                time: `${date} ${z}:00:00`,
+            };
+            dataArray.push(data);
+        }
+
+        for (let i = 0; i < result.length; i += 1) {
+            dataArray[i].ratings = result[i];
+        }
+
         res.json({
             error: false,
-            data: result,
+            data: dataArray,
+            emoticons,
         });
     });
 });
 
-router.post('/report', (req, res) => {
+router.post('/days', async (req, res) => {
     const {
         startDate,
         endDate,
-        settingsId,
     } = req.body;
+
+    const settings = await getCurrentSettings();
+    const emoticons = await getEmoticons(settings.emoticonsGroupId);
+
+    let start = new Date(startDate);
+    const end = new Date(endDate);
+
+
+    const promises = [];
+
+    while (start <= end) {
+        let month = start.getMonth() + 1;
+        if (month < 10) {
+            month = `0${month}`;
+        }
+        let day = start.getDate();
+        if (day < 10) {
+            day = `0${day}`;
+        }
+        const date = `${start.getFullYear()}-${month}-${day}`;
+        promises.push(model.ratings.findAll({
+                where: {
+                    settingId: settings.id,
+                    time: {
+                        [Op.startsWith]: date,
+                    },
+                },
+                attributes: [
+                    'emoticonId',
+                    [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
+                ],
+                group: ['emoticonId'],
+
+                raw: true,
+            })
+            .then(ratings => ratings)
+            .catch(error => res.json({
+                error: true,
+                message: error,
+            })));
+
+
+        start.setDate(start.getDate() + 1);
+    }
+
+    const dataArray = [];
+
+    Promise.all(promises).then((result) => {
+        // const filtered = result.filter(el => el.length > 0);
+        start = new Date(startDate);
+        while (start <= end) {
+            let month = start.getMonth() + 1;
+            if (month < 10) {
+                month = `0${month}`;
+            }
+            let day = start.getDate();
+            if (day < 10) {
+                day = `0${day}`;
+            }
+            const date = `${start.getFullYear()}-${month}-${day}`;
+
+            const data = {
+                time: date,
+            };
+            dataArray.push(data);
+
+            start.setDate(start.getDate() + 1);
+        }
+        for (let i = 0; i < result.length; i += 1) {
+            dataArray[i].ratings = result[i];
+        }
+
+        res.json({
+            error: false,
+            data: dataArray,
+            emoticons,
+        });
+    });
+});
+
+
+router.post('/report', async (req, res) => {
+    const {
+        startDate,
+        endDate,
+    } = req.body;
+
+    const settings = await getCurrentSettings();
+    const emoticons = await getEmoticons(settings.emoticonsGroupId);
 
 
     model.ratings.findAll({
-
             where: {
-                settingId: settingsId,
+                settingId: settings.id,
                 time: {
                     [Op.gte]: new Date(`${startDate}T00:00:00.000Z`),
-                    [Op.lt]: new Date(`${endDate}T23:59:59.999Z`),
+                    [Op.lte]: new Date(`${endDate}T23:59:59.999Z`),
                 },
             },
             include: [{
                 model: model.emoticons,
-                attributes: ['name', 'symbol', 'value'],
+                attributes: ['id', 'name', 'symbol', 'value'],
             }],
             attributes: [
                 'emoticonId',
@@ -107,6 +313,7 @@ router.post('/report', (req, res) => {
         .then(count => res.json({
             error: false,
             data: count,
+            emoticons,
         }))
         .catch(error => res.json({
             error: true,
@@ -117,16 +324,17 @@ router.post('/report', (req, res) => {
 
 
 /* get count of ratings in one day */
-router.post('/count', (req, res) => {
+router.post('/count', async (req, res) => {
     const {
         date,
-        settingsId,
     } = req.body;
 
 
+    const settings = await getCurrentSettings();
+
     model.ratings.findAll({
             where: {
-                settingId: settingsId,
+                settingId: settings.id,
                 time: {
                     [Op.startsWith]: date,
                 },
@@ -139,7 +347,7 @@ router.post('/count', (req, res) => {
             group: ['emoticonId'],
             include: [{
                 model: model.emoticons,
-                attributes: ['name', 'symbol'],
+                attributes: ['id', 'name', 'symbol', 'value'],
             }],
             raw: true,
         })
@@ -180,21 +388,20 @@ router.post('/many', async (req, res) => {
         ratingsArray,
     } = req.body;
 
-    const settings = await model.settings.findOne({
-        order: [
-            ['createdAt', 'DESC'],
-        ],
-        raw: true,
-    });
+    const settings = await getCurrentSettings();
 
     const promises = [];
 
     ratingsArray.forEach((rating) => {
         promises.push(model.ratings.create({
-            emoticonId: rating.emoticonId,
-            time: Date(),
-            settingId: settings.id,
-        }));
+                emoticonId: rating.emoticonId,
+                time: Date(),
+                settingId: settings.id,
+            }).then(ratings => ratings)
+            .catch(error => res.json({
+                error: true,
+                message: error,
+            })));
     });
 
     Promise.all(promises).then((result) => {
@@ -211,7 +418,6 @@ router.post('/many', async (req, res) => {
 router.post('/', async (req, res) => {
     const {
         emoticonId,
-        settingId,
     } = req.body;
 
     const emoticon = await model.emoticons.findOne({
@@ -221,12 +427,7 @@ router.post('/', async (req, res) => {
         raw: true,
     });
 
-    const settings = await model.settings.findOne({
-        where: {
-            id: settingId,
-        },
-        raw: true,
-    });
+    const settings = await getCurrentSettings();
 
     if (emoticon.emoticonsGroupId !== settings.emoticonsGroupId) {
         res.json({
@@ -244,6 +445,9 @@ router.post('/', async (req, res) => {
                 data: ratings,
                 message: 'New reaction have been added.',
             }))
+            .then(() => {
+                checkRatingsStatus(settings);
+            })
             .catch(error => res.json({
                 error: true,
                 message: error,
@@ -279,40 +483,3 @@ router.put('/:id', (req, res) => {
 
 
 module.exports = router;
-
-/* router.get('/counts', (req, res) => {
-    model.ratings.findAll({
-            attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
-            group: ['emoticonId'],
-            raw: true,
-        })
-        .then(ratings => res.json({
-            error: false,
-            data: ratings,
-        }))
-        .catch(error => res.json({
-            error: true,
-            data: [],
-            message: error,
-        }));
-}); */
-
-/* router.get('/counts/:settingId', (req, res) => {
-    const setting = req.params.settingId;
-    model.ratings.findAll({
-            attributes: ['emoticonId', [sequelize.fn('count', sequelize.col('emoticonId')), 'count']],
-            where: {
-                settingId: setting,
-            },
-            group: ['emoticonId'],
-            raw: true,
-        }).then(ratings => res.json({
-            error: false,
-            data: ratings,
-        }))
-        .catch(error => res.json({
-            error: true,
-            data: [],
-            message: error,
-        }));
-}); */

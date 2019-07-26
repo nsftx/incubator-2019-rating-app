@@ -1,17 +1,16 @@
-'use strict';
 module.exports = (sequelize, DataTypes) => {
   const ratings = sequelize.define('ratings', {
     settingId: DataTypes.INTEGER,
     time: DataTypes.DATE,
-    emoticonId: DataTypes.INTEGER
+    emoticonId: DataTypes.INTEGER,
   }, {});
-  ratings.associate = function (models) {
+  ratings.associate = (models) => {
     ratings.belongsTo(models.settings, {
-      foreignKey: 'settingId'
+      foreignKey: 'settingId',
     });
     ratings.belongsTo(models.emoticons, {
-      foreignKey: 'emoticonId'
-    })
+      foreignKey: 'emoticonId',
+    });
   };
   return ratings;
 };

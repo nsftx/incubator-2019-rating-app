@@ -1,19 +1,16 @@
 module.exports = {
-  up: function(queryInterface, Sequelize) {
-    // logic for transforming into the new state
-    return queryInterface.addColumn(
+  up: (queryInterface, Sequelize) => {
+    queryInterface.addColumn(
       'emoticons', 'value',
-      
-     Sequelize.INTEGER
-    );
 
+      Sequelize.INTEGER,
+    );
   },
 
-  down: function(queryInterface, Sequelize) {
-    // logic for reverting the changes
-    return queryInterface.removeColumn(
+  down: (queryInterface) => {
+    queryInterface.removeColumn(
       'emoticons',
-      'value'
+      'value',
     );
-  }
-}
+  },
+};
