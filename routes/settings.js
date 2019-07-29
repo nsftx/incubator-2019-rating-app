@@ -5,6 +5,45 @@ const router = express.Router();
 const model = require('../models/index');
 const auth = require('../middleware/auth');
 
+const funkcija = async (emoticonsGroupId1, emoticonNumber1) => {
+	const emoticons = await model.emoticons.findAll({
+		where: {
+			emoticonsGroupId : emoticonsGroupId1 ,
+			emoticonNumber : emoticonNumber1,
+		},
+		attributes: ['id', 'name', 'value', 'symbol'],
+		raw: true,
+	}); };
+
+	router.post('/xxx', async (req, res) => {
+		const {
+			emoticonNumber,
+			emoticonsGroupId,
+		} = req.body;
+
+		model.settings.findAll({
+			where: {
+				emoticonsGroupId : emoticonsGroupId,
+				emoticonNumber : emoticonNumber,
+			},
+			attributes: ['id', 'emoticonNumber', 'messageId', 'emoticonsGroupId', 'messageTimeout', 'userId'],
+			raw: true,
+		}) 
+			.then(async (settings) => {
+
+				res.json({
+					error: false,
+					data: settings,
+					
+				});
+			})
+			.catch(error => res.json({
+				error: true,
+				data: [],
+				message: error,
+			}));
+	});
+
 const getEmoticonsForSettings = async (emoticonsGroupId, emoticonNumber) => {
 	const emoticons = await model.emoticons.findAll({
 		where: {
