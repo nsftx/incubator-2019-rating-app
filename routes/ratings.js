@@ -5,6 +5,7 @@ const router = express.Router();
 const request = require('request-promise');
 const moment = require('moment');
 const model = require('../models/index');
+const auth = require('../middleware/auth');
 
 // eslint-disable-next-line prefer-destructuring
 const Op = sequelize.Op;
@@ -29,6 +30,28 @@ const getEmoticons = async (groupId) => {
         raw: true,
     });
     return emoticons;
+};
+const getEmoticonsForSettings = async (emoticonsGroupId, emoticonNumber) => {
+    const emoticons = await model.emoticons.findAll({
+        where: {
+            emoticonsGroupId,
+        },
+        attributes: ['id', 'name', 'value', 'symbol'],
+        raw: true,
+    });
+    let filteredEmoticons = [];
+    if (emoticonNumber === 3) {
+        for (let i = 0; i < emoticons.length; i += 2) {
+            filteredEmoticons.push(emoticons[i]);
+        }
+    } else if (emoticonNumber === 4) {
+        const middleElementIndex = parseInt(emoticons.length / 2, 10);
+        filteredEmoticons = emoticons;
+        emoticons.splice(middleElementIndex, 1);
+    } else {
+        filteredEmoticons = emoticons;
+    }
+    return filteredEmoticons;
 };
 
 const slackPush = (averageRating) => {
@@ -99,7 +122,7 @@ const checkRatingsStatus = async (settings) => {
 };
 
 /* GET all ratings. */
-router.get('/', (req, res) => {
+router.get('/', auth, (req, res) => {
     model.ratings.findAll({
             include: [model.settings],
         }).then(ratings => res.json({
@@ -114,14 +137,14 @@ router.get('/', (req, res) => {
 });
 
 /* get count of ratings in specified intervals */
-router.post('/range', async (req, res) => {
+router.post('/range', auth, async (req, res) => {
     const {
         date,
         interval,
     } = req.body;
 
     const settings = await getCurrentSettings();
-    const emoticons = await getEmoticons(settings.emoticonsGroupId);
+    const emoticons = await getEmoticonsForSettings(settings.emoticonsGroupId, settings.emoticonNumber);
 
     const promises = [];
 
@@ -195,14 +218,14 @@ router.post('/range', async (req, res) => {
     });
 });
 
-router.post('/days', async (req, res) => {
+router.post('/days', auth, async (req, res) => {
     const {
         startDate,
         endDate,
     } = req.body;
 
     const settings = await getCurrentSettings();
-    const emoticons = await getEmoticons(settings.emoticonsGroupId);
+    const emoticons = await getEmoticonsForSettings(settings.emoticonsGroupId, settings.emoticonNumber);
 
     let start = new Date(startDate);
     const end = new Date(endDate);
@@ -281,7 +304,7 @@ router.post('/days', async (req, res) => {
 });
 
 
-router.post('/report', async (req, res) => {
+router.post('/report', auth, async (req, res) => {
     const {
         startDate,
         endDate,
@@ -323,7 +346,7 @@ router.post('/report', async (req, res) => {
 
 
 /* get count of ratings in one day */
-router.post('/count', async (req, res) => {
+router.post('/count', auth, async (req, res) => {
     const {
         date,
     } = req.body;
@@ -362,7 +385,7 @@ router.post('/count', async (req, res) => {
 
 
 /* GET one rating */
-router.get('/:id', (req, res) => {
+router.get('/:id', auth, (req, res) => {
     const ratingId = req.params.id;
 
     model.ratings.findOne({
@@ -381,7 +404,7 @@ router.get('/:id', (req, res) => {
 });
 
 /* CREATE bulk of ratings */
-router.post('/many', async (req, res) => {
+router.post('/many', auth, async (req, res) => {
     const {
         ratingsArray,
     } = req.body;
@@ -413,7 +436,7 @@ router.post('/many', async (req, res) => {
 });
 
 /* ADD new rating */
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     const {
         emoticonId,
     } = req.body;
@@ -454,7 +477,7 @@ router.post('/', async (req, res) => {
 });
 
 /* UPDATE rating */
-router.put('/:id', (req, res) => {
+router.put('/:id', auth, (req, res) => {
     const ratingId = req.params.id;
 
     const {

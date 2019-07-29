@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     isSuperAdmin: DataTypes.BOOLEAN,
     image: DataTypes.STRING,
+    token: DataTypes.STRING,
   }, {});
   users.associate = (models) => {
     users.hasMany(models.settings, {
