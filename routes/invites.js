@@ -2,9 +2,10 @@ const express = require('express');
 
 const router = express.Router();
 const model = require('../models/index');
+const auth = require('../middleware/auth');
 
 /* GET users listing. */
-router.post('/', (req, res) => {
+router.post('/', auth, (req, res) => {
     const {
         email,
     } = req.body;

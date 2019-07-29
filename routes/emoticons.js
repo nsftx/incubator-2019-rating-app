@@ -3,8 +3,10 @@ const express = require('express');
 const router = express.Router();
 const model = require('../models/index');
 // var sequelize = require('sequelize')
+const auth = require('../middleware/auth');
 
-router.get('/', (req, res) => {
+
+router.get('/', auth, (req, res) => {
   model.emoticons.findAll().then(emoticons => res.json({
       error: false,
       data: emoticons,
@@ -18,7 +20,7 @@ router.get('/', (req, res) => {
 
 
 // Emoticons POST
-router.post('/', (req, res) => {
+router.post('/', auth, (req, res) => {
   const {
     name,
     symbol,
@@ -45,7 +47,7 @@ router.post('/', (req, res) => {
 
 // Emoticons UPDATE
 
-router.put('/:id', (req, res) => {
+router.put('/:id', auth, (req, res) => {
   const {
     id,
   } = req.params;
@@ -79,7 +81,7 @@ router.put('/:id', (req, res) => {
 });
 
 // get one
-router.get('/:id', (req, res) => {
+router.get('/:id', auth, (req, res) => {
   const EmoticonsId = req.params.id;
 
   model.settings.findOne({
@@ -104,7 +106,7 @@ router.get('/:id', (req, res) => {
 
 
 // delete
-router.delete('/:id', (req, res) => {
+router.delete('/:id', auth, (req, res) => {
   const EmoticonsId = req.params.id;
 
   model.emoticons.destroy({

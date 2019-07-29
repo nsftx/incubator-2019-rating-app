@@ -3,9 +3,11 @@ const express = require('express');
 const router = express.Router();
 
 const model = require('../models/index');
+const auth = require('../middleware/auth');
+
 
 // get all
-router.get('/', (req, res) => {
+router.get('/', auth, (req, res) => {
   model.emoticonsGroups.findAll({
       include: [model.emoticons],
       order: [
@@ -26,7 +28,7 @@ router.get('/', (req, res) => {
 
 
 // post
-router.post('/', (req, res) => {
+router.post('/', auth, (req, res) => {
   const {
     name,
   } = req.body;
@@ -48,7 +50,7 @@ router.post('/', (req, res) => {
 });
 
 //  array post
-router.post('/many', async (req, res) => {
+router.post('/many', auth, async (req, res) => {
   const {
     name,
     emoticonsArray,
@@ -91,7 +93,7 @@ router.post('/many', async (req, res) => {
 
 
 // put
-router.put('/:id', (req, res) => {
+router.put('/:id', auth, (req, res) => {
   const emoticonsGroupID = req.params.id;
 
   const {
@@ -117,7 +119,7 @@ router.put('/:id', (req, res) => {
 });
 // get one
 
-router.get('/:id', (req, res) => {
+router.get('/:id', auth, (req, res) => {
   const emoticonsGroupId = req.params.id;
 
   model.emoticonsGroups.findOne({
@@ -135,7 +137,7 @@ router.get('/:id', (req, res) => {
     }));
 });
 // delete
-router.delete('/:id', (req, res) => {
+router.delete('/:id', auth, (req, res) => {
   const emoticonsGroupId = req.params.id;
 
   model.emoticonsGroups.destroy({

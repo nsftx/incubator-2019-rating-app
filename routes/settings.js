@@ -1,8 +1,9 @@
 const express = require('express');
+// const socket = require('socket.io-client')('http://localhost:7000');
 
 const router = express.Router();
 const model = require('../models/index');
-
+const auth = require('../middleware/auth');
 
 const getEmoticonsForSettings = async (emoticonsGroupId, emoticonNumber) => {
 	const emoticons = await model.emoticons.findAll({
@@ -27,7 +28,7 @@ const getEmoticonsForSettings = async (emoticonsGroupId, emoticonNumber) => {
 	return filteredEmoticons;
 };
 
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
 	model.settings.findAll({
 			include: [{
 					model: model.messages,
@@ -85,7 +86,7 @@ router.get('/last', async (req, res) => {
 		}));
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', auth, (req, res) => {
 	const settingsId = req.params.id;
 
 	model.settings.findOne({
@@ -138,7 +139,7 @@ router.get('/:id', (req, res) => {
 });
 
 
-router.post('/', (req, res) => {
+router.post('/', auth, (req, res) => {
 	const {
 		emoticonsNo,
 		message,
@@ -185,7 +186,7 @@ router.post('/', (req, res) => {
 });
 
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
 	const settingsId = req.params.id;
 	const {
 		emoticonNumber,
@@ -194,6 +195,7 @@ router.put('/:id', async (req, res) => {
 		emoticonsGroupId,
 		userId,
 	} = req.body;
+
 	const objekt = {};
 	objekt.error = false;
 	objekt.data = req.body;
@@ -249,7 +251,7 @@ router.put('/:id', async (req, res) => {
 			.then(async (settings) => {
 
 				objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
-				//console.log(objekt.emoticons);
+				// console.log(objekt.emoticons);
 				const socket = require('socket.io-client')('http://localhost:7000');
 				socket.on('connect', () => {
 					socket.emit('settings', objekt);
@@ -257,7 +259,7 @@ router.put('/:id', async (req, res) => {
 				res.json({
 					error: false,
 					data: settings,
-					message: 'Settings have ben updated.',
+					message: 'Settings have been updated.',
 				});
 			})
 			.catch(error => res.json({
@@ -276,7 +278,7 @@ router.put('/:id', async (req, res) => {
 
 				objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
 				objekt.data = settings;
-				//console.log(objekt.emoticons);
+				// console.log(objekt.emoticons);
 				const socket = require('socket.io-client')('http://localhost:7000');
 				socket.on('connect', () => {
 					socket.emit('settings', objekt);
@@ -284,12 +286,11 @@ router.put('/:id', async (req, res) => {
 				res.status(201).json({
 					error: false,
 					data: settings,
-					message: 'Settings have ben created.',
+					message: 'Settings have been created.',
 				});
 			})
 			.catch(error => res.json({
 				error: true,
-
 				message: error,
 			}));
 	}
@@ -297,7 +298,7 @@ router.put('/:id', async (req, res) => {
 
 
 /* Delete settings. */
-router.delete('/:id', (req, res) => {
+router.delete('/:id', auth, (req, res) => {
 	const settings = req.params.id;
 
 	model.settings.destroy({

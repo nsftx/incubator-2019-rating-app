@@ -2,9 +2,10 @@ const express = require('express');
 
 const router = express.Router();
 const model = require('../models/index');
+const auth = require('../middleware/auth');
 
 
-router.get('/', (req, res) => {
+router.get('/', auth, (req, res) => {
     model.messages.findAll({})
         .then(messages => res.json({
             error: false,
@@ -17,7 +18,7 @@ router.get('/', (req, res) => {
         }));
 });
 
-router.post('/', (req, res) => {
+router.post('/', auth, (req, res) => {
     const {
         text,
         language,
@@ -48,7 +49,7 @@ router.post('/', (req, res) => {
 
 
 // update settings to new message
-router.post('/:settingId', async (req, res) => {
+router.post('/:settingId', auth, async (req, res) => {
     const {
         text,
         language,
@@ -87,7 +88,7 @@ router.post('/:settingId', async (req, res) => {
     }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', auth, (req, res) => {
     const messageId = req.params.id;
 
     const {
@@ -123,7 +124,7 @@ router.put('/:id', (req, res) => {
 });
 
 
-router.get('/language/:lang', (req, res) => {
+router.get('/language/:lang', auth, (req, res) => {
     const lang = req.params;
 
     model.messages.findAll({
@@ -141,7 +142,7 @@ router.get('/language/:lang', (req, res) => {
         }));
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', auth, (req, res) => {
     const messageId = req.params.id;
 
     model.messages.findOne({
