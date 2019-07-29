@@ -251,9 +251,11 @@ router.put('/:id', auth, async (req, res) => {
 			.then(async (settings) => {
 
 				objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
+
 				// console.log(objekt.emoticons);
 				const socket = require('socket.io-client')('http://localhost:7000');
 				socket.on('connect', () => {
+
 					socket.emit('settings', objekt);
 				});
 				res.json({
@@ -278,9 +280,11 @@ router.put('/:id', auth, async (req, res) => {
 
 				objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
 				objekt.data = settings;
+
 				// console.log(objekt.emoticons);
 				const socket = require('socket.io-client')('http://localhost:7000');
 				socket.on('connect', () => {
+
 					socket.emit('settings', objekt);
 				});
 				res.status(201).json({

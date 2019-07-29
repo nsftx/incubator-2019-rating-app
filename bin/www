@@ -29,7 +29,6 @@ const io = require('socket.io')(server);
 
 io.listen('7000');
 
-console.log('Listening at port => ', port);
 io.on('connection', (socket) => {
   console.log('connected');
   socket.on('settings', (data) => {
