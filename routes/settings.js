@@ -140,12 +140,15 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
 	const {
-		emoticonsNo,
-		message,
-		timeout,
-		group,
-		user,
+		emoticonNumber,
+		messageId,
+		messageTimeout,
+		emoticonsGroupId,
+		userId,
 	} = req.body;
+	const objekt = {};
+	objekt.error = false;
+	objekt.data = req.body;
 	if (typeof (emoticonsNo) !== 'undefined') {
 		if (emoticonsNo < 3 || emoticonsNo > 5) {
 			res.json({
@@ -167,17 +170,28 @@ router.post('/', (req, res) => {
 	}
 
 	model.settings.create({
-			emoticonNumber: emoticonsNo,
-			messageId: message,
-			messageTimeout: timeout,
-			emoticonsGroupId: group,
-			userId: user,
+			emoticonNumber: emoticonNumber,
+			messageId: messageId,
+			messageTimeout: messageTimeout,
+			emoticonsGroupId: emoticonsGroupId,
+			userId: userId,
 		})
-		.then(settings => res.status(201).json({
-			error: false,
-			data: settings,
-			message: 'New settings have been created.',
-		}))
+		.then(async (settings) => {
+
+			objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
+			//console.log(objekt.emoticons);
+			const socket = require('socket.io-client')('http://localhost:7000');
+			socket.on('connect', () => {
+				socket.emit('settings', objekt);
+			});
+			return res.json({
+				error: false,
+				data: settings,
+				message: 'Settings have ben updated.',
+				
+			});
+		})
+		
 		.catch(error => res.json({
 			error: true,
 			message: error,
