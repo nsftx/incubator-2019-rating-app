@@ -11,6 +11,20 @@ const client = new OAuth2Client('641180167952-h84f394tnm50qm8j30t101cla1k2aglh.a
 
 const model = require('../models/index');
 
+
+const updateToken = async (userId, newToken) => {
+	console.log(userId, newToken);
+	await model.users.update({
+			token: newToken,
+		}, {
+			where: {
+				id: userId,
+			},
+		})
+		.then(user => console.log('user updated'))
+		.error(error => console.log(error));
+};
+
 /* GET users listing. */
 router.get('/', (req, res) => {
 	res.send('respond with a resource');
@@ -80,7 +94,11 @@ router.post('/auth', (req, res) => {
 });
 
 router.post('/login', (req, res) => {
-	const token = req.body.idToken;
+	// const token = req.body.idToken;
+	console.log(req.headers);
+	const token = req.headers.authorization;
+	console.log('length', req.headers.authorization.length);
+
 	async function verify() {
 		const ticket = await client.verifyIdToken({
 			idToken: token,
@@ -90,14 +108,20 @@ router.post('/login', (req, res) => {
 		});
 		const payload = ticket.getPayload();
 		const user = payload;
+		console.log(user);
 
 		model.users.findOne({
 			where: {
 				googleId: user.sub,
 			},
-		}).then((currentUser) => {
+			raw: true,
+		}).then(async (currentUser) => {
 			if (currentUser) {
 				// console.log('user is: ', currentUser);
+				if (token !== currentUser.token) {
+					console.log('current user id', currentUser.id);
+					await updateToken(currentUser.id, token);
+				}
 				return res.json({
 					error: false,
 					existingUser: true,
@@ -112,7 +136,7 @@ router.post('/login', (req, res) => {
 				if (!existingInvite) {
 					return res.json({
 						error: true,
-						data: [],
+						data: 'update error',
 						message: 'Invitation for user does not exist',
 					});
 				}
@@ -122,6 +146,7 @@ router.post('/login', (req, res) => {
 					lastName: user.family_name,
 					email: user.email,
 					image: user.picture,
+					token,
 				}).then((newUser) => {
 					res.json({
 						error: false,
@@ -130,17 +155,17 @@ router.post('/login', (req, res) => {
 					});
 				}).catch(error => res.json({
 					error: true,
-					data: [],
+					data: 'create error',
 					message: error,
 				}));
 			}).catch(error => res.json({
 				error: true,
-				data: [],
+				data: 'login error',
 				message: error,
 			}));
 		}).catch(error => res.json({
 			error: true,
-			data: [],
+			data: 'current user',
 			message: error,
 		}));
 	}
