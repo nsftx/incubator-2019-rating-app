@@ -197,8 +197,6 @@ router.put('/:id', async (req, res) => {
 	const objekt = {};
 	objekt.error = false;
 	objekt.data = req.body;
-	
-
 
 	if (typeof (emoticonNumber) !== 'undefined') {
 		if (emoticonNumber < 3 || emoticonNumber > 5) {
@@ -249,19 +247,19 @@ router.put('/:id', async (req, res) => {
 				},
 			})
 			.then(async (settings) => {
-				
+
 				objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
-				console.log(objekt.emoticons);
-				const socket = require('socket.io-client')('http://localhost:6000');
-				socket.on('connect', ()=> {
+				//console.log(objekt.emoticons);
+				const socket = require('socket.io-client')('http://localhost:7000');
+				socket.on('connect', () => {
 					socket.emit('settings', objekt);
 				});
 				res.json({
 					error: false,
 					data: settings,
-					message:'Settings have ben updated.',
+					message: 'Settings have ben updated.',
 				});
-			} )
+			})
 			.catch(error => res.json({
 				error: true,
 				message: error,
@@ -275,20 +273,20 @@ router.put('/:id', async (req, res) => {
 				userId,
 			})
 			.then(async (settings) => {
-				
+
 				objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
 				objekt.data = settings;
-				console.log(objekt.emoticons);
-				const socket = require('socket.io-client')('http://localhost:6000');
-				socket.on('connect', ()=> {
+				//console.log(objekt.emoticons);
+				const socket = require('socket.io-client')('http://localhost:7000');
+				socket.on('connect', () => {
 					socket.emit('settings', objekt);
 				});
 				res.status(201).json({
 					error: false,
 					data: settings,
-					message:'Settings have ben created.',
+					message: 'Settings have ben created.',
 				});
-			} )
+			})
 			.catch(error => res.json({
 				error: true,
 
