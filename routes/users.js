@@ -11,12 +11,26 @@ const client = new OAuth2Client('641180167952-h84f394tnm50qm8j30t101cla1k2aglh.a
 
 const model = require('../models/index');
 
+
+const updateToken = async (userId, newToken) => {
+	console.log(userId, newToken);
+	await model.users.update({
+			token: newToken,
+		}, {
+			where: {
+				id: userId,
+			},
+		})
+		.then(user => console.log('user updated'))
+		.error(error => console.log(error));
+};
+
 /* GET users listing. */
 router.get('/', (req, res) => {
 	res.send('respond with a resource');
 });
 
-router.post('/login', (req, res) => {
+router.post('/auth', (req, res) => {
 	const {
 		sub,
 		given_name,
@@ -79,23 +93,81 @@ router.post('/login', (req, res) => {
 	}));
 });
 
-router.post('/auth', (req, res) => {
-	const token = req.body.idToken;
+router.post('/login', (req, res) => {
+	// const token = req.body.idToken;
+	console.log(req.headers);
+	const token = req.headers.authorization;
+	console.log('length', req.headers.authorization.length);
+
 	async function verify() {
 		const ticket = await client.verifyIdToken({
 			idToken: token,
 			audience: '641180167952-h84f394tnm50qm8j30t101cla1k2aglh.apps.googleusercontent.com', // Specify the CLIENT_ID of the app that accesses the backend
 			// Or, if multiple clients access the backend:
-			//[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+			// [CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
 		});
 		const payload = ticket.getPayload();
-		const userid = payload.sub;
-		return res.json({
-			user: payload,
-			userid,
-		});
-		// If request specified a G Suite domain:
-		//const domain = payload['hd'];
+		const user = payload;
+		console.log(user);
+
+		model.users.findOne({
+			where: {
+				googleId: user.sub,
+			},
+			raw: true,
+		}).then(async (currentUser) => {
+			if (currentUser) {
+				// console.log('user is: ', currentUser);
+				if (token !== currentUser.token) {
+					console.log('current user id', currentUser.id);
+					await updateToken(currentUser.id, token);
+				}
+				return res.json({
+					error: false,
+					existingUser: true,
+					data: currentUser,
+				});
+			}
+			model.invites.findOne({
+				where: {
+					email: user.email,
+				},
+			}).then((existingInvite) => {
+				if (!existingInvite) {
+					return res.json({
+						error: true,
+						data: 'update error',
+						message: 'Invitation for user does not exist',
+					});
+				}
+				model.users.create({
+					googleId: user.sub,
+					firstName: user.given_name,
+					lastName: user.family_name,
+					email: user.email,
+					image: user.picture,
+					token,
+				}).then((newUser) => {
+					res.json({
+						error: false,
+						existingUser: false,
+						data: newUser,
+					});
+				}).catch(error => res.json({
+					error: true,
+					data: 'create error',
+					message: error,
+				}));
+			}).catch(error => res.json({
+				error: true,
+				data: 'login error',
+				message: error,
+			}));
+		}).catch(error => res.json({
+			error: true,
+			data: 'current user',
+			message: error,
+		}));
 	}
 	verify().catch(error => res.json({
 		error: 'User not found or token expired',
