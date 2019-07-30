@@ -67,6 +67,16 @@ const getEmoticonsForSettings = async (emoticonsGroupId, emoticonNumber) => {
 	return filteredEmoticons;
 };
 
+const getMessage = async (messageId) => {
+	const message = await model.messages.findOne({
+		where: {
+			id: messageId,
+		},
+		attributes: ['id', 'text'],
+	});
+	return message;
+};
+
 router.get('/', auth, async (req, res) => {
 	model.settings.findAll({
 			include: [{
@@ -252,6 +262,7 @@ router.put('/:id', auth, async (req, res) => {
 	const objekt = {};
 	objekt.error = false;
 	objekt.data = req.body;
+	objekt.data.message = await getMessage(messageId);
 
 	if (typeof (emoticonNumber) !== 'undefined') {
 		if (emoticonNumber < 3 || emoticonNumber > 5) {
