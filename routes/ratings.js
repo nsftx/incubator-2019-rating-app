@@ -436,7 +436,7 @@ router.post('/many', auth, async (req, res) => {
 });
 
 /* ADD new rating */
-router.post('/', auth, async (req, res) => {
+router.post('/', async (req, res) => {
     const {
         emoticonId,
     } = req.body;
