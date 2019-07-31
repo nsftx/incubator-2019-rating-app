@@ -13,7 +13,7 @@ const model = require('../models/index');
 
 
 const updateToken = async (userId, newToken) => {
-	console.log(userId, newToken);
+	/* console.log(userId, newToken); */
 	await model.users.update({
 			token: newToken,
 		}, {
@@ -94,11 +94,7 @@ router.post('/auth', (req, res) => {
 });
 
 router.post('/login', (req, res) => {
-	// const token = req.body.idToken;
-	console.log(req.headers);
 	const token = req.headers.authorization;
-	console.log('length', req.headers.authorization.length);
-
 	async function verify() {
 		const ticket = await client.verifyIdToken({
 			idToken: token,
@@ -108,7 +104,6 @@ router.post('/login', (req, res) => {
 		});
 		const payload = ticket.getPayload();
 		const user = payload;
-		console.log(user);
 
 		model.users.findOne({
 			where: {
@@ -117,9 +112,7 @@ router.post('/login', (req, res) => {
 			raw: true,
 		}).then(async (currentUser) => {
 			if (currentUser) {
-				// console.log('user is: ', currentUser);
 				if (token !== currentUser.token) {
-					console.log('current user id', currentUser.id);
 					await updateToken(currentUser.id, token);
 				}
 				return res.json({
