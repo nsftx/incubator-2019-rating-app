@@ -111,8 +111,8 @@ const checkRatingsStatus = async (settings) => {
         raw: true,
     });
     const averageRating = sum['emoticon.sum'] / ratingsCount.count;
-    console.log(sum['emoticon.sum'], ratingsCount.count);
-    console.log('Average rating:', averageRating);
+    /* console.log(sum['emoticon.sum'], ratingsCount.count);
+    console.log('Average rating:', averageRating); */
     if (ratingsCount.count > 200 && averageRating < 3.5) {
         // to avoid spam in slack check every 50th rating in day
         if (ratingsCount.count % 50 === 0) {
@@ -144,6 +144,7 @@ router.post('/range', auth, async (req, res) => {
     } = req.body;
 
     const settings = await getCurrentSettings();
+    // eslint-disable-next-line max-len
     const emoticons = await getEmoticonsForSettings(settings.emoticonsGroupId, settings.emoticonNumber);
 
     const promises = [];
@@ -225,6 +226,7 @@ router.post('/days', auth, async (req, res) => {
     } = req.body;
 
     const settings = await getCurrentSettings();
+    // eslint-disable-next-line max-len
     const emoticons = await getEmoticonsForSettings(settings.emoticonsGroupId, settings.emoticonNumber);
 
     let start = new Date(startDate);
