@@ -59,33 +59,32 @@ router.post('/:settingId', auth, async (req, res) => {
     const settingId = req.params.settingId;
 
     if (text.length < 3 || text.length > 120) {
-        res.json({
+        return res.json({
             error: true,
             message: 'Text must be between 3 and 120 characters!',
         });
-    } else {
-        model.messages.create({
-                text,
-                language,
-            }).then((messages) => {
-                model.settings.update({
-                    messageId: messages.dataValues.id,
-                }, {
-                    where: {
-                        id: settingId,
-                    },
-                });
-            })
-            .then(messages => res.json({
-                error: false,
-                data: messages,
-                message: 'Message has been created!',
-            }))
-            .catch(error => res.json({
-                error: true,
-                message: error,
-            }));
     }
+    model.messages.create({
+            text,
+            language,
+        }).then((messages) => {
+            model.settings.update({
+                messageId: messages.dataValues.id,
+            }, {
+                where: {
+                    id: settingId,
+                },
+            });
+        })
+        .then(messages => res.json({
+            error: false,
+            data: messages,
+            message: 'Message has been created!',
+        }))
+        .catch(error => res.json({
+            error: true,
+            message: error,
+        }));
 });
 
 router.put('/:id', auth, (req, res) => {
