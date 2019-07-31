@@ -144,7 +144,6 @@ router.post('/range', auth, async (req, res) => {
     } = req.body;
 
     const settings = await getCurrentSettings();
-    // eslint-disable-next-line max-len
     const emoticons = await getEmoticonsForSettings(settings.emoticonsGroupId, settings.emoticonNumber);
 
     const promises = [];
