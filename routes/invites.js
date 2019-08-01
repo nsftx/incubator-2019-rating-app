@@ -36,6 +36,19 @@ router.post('/', auth, (req, res) => {
                 email,
             }).then((newInvite) => {
                 // console.log('created new user: ', newUser);
+                const mailOptions = {
+                    from: 'ratings.app3@gmail.com',
+                    to: email,
+                    subject: 'App invite test',
+                    text: 'That was easy!',
+                };
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        console.log(`Email sent: ${info.response}`);
+                    }
+                });
                 res.json({
                     error: false,
                     data: newInvite,
@@ -45,19 +58,7 @@ router.post('/', auth, (req, res) => {
                 data: [],
                 message: error,
             }));
-            const mailOptions = {
-                from: 'ratings.app3@gmail.com',
-                to: email,
-                subject: 'App invite test',
-                text: 'That was easy!',
-            };
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.log(error);
-                } else {
-                    console.log(`Email sent: ${info.response}`);
-                }
-            });
+
         }
     });
 });
