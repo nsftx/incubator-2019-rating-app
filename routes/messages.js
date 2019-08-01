@@ -67,7 +67,8 @@ router.post('/:settingId', auth, async (req, res) => {
     model.messages.create({
             text,
             language,
-        }).then((messages) => {
+        })
+        .then((messages) => {
             model.settings.update({
                 messageId: messages.dataValues.id,
             }, {

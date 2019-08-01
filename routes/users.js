@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable camelcase */
 const express = require('express');
 
@@ -21,14 +22,9 @@ const updateToken = async (userId, newToken) => {
 				id: userId,
 			},
 		})
-		.then(user => console.log('user updated'))
 		.error(error => console.log(error));
 };
 
-/* GET users listing. */
-router.get('/', (req, res) => {
-	res.send('respond with a resource');
-});
 
 router.post('/auth', (req, res) => {
 	const {

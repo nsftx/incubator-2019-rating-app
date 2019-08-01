@@ -1,10 +1,21 @@
 /* eslint-disable global-require */
 const express = require('express');
 // const socket = require('socket.io-client')('http://localhost:7000');
+const http = require('http');
+
+const srv = http.createServer();
+const io = require('socket.io')(srv);
 
 const router = express.Router();
 const model = require('../models/index');
 const auth = require('../middleware/auth');
+
+const PORT = 7000;
+io.listen(PORT);
+console.log('Listening at port => ', PORT);
+io.on('connection', () => {
+	console.log('connected');
+});
 
 /* const funkcija = async (emoticonsGroupId1, emoticonNumber1) => {
 	const emoticons = await model.emoticons.findAll({
@@ -230,10 +241,9 @@ router.post('/', auth, (req, res) => {
 		})
 		.then(async (settings) => {
 			objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
-			const socket = require('socket.io-client')('http://localhost:7000');
-			socket.on('connect', () => {
-				socket.emit('settings', objekt);
-			});
+			// Send live info to client
+			io.emit('newSettings', objekt);
+
 			return res.json({
 				error: false,
 				data: settings,
@@ -313,11 +323,9 @@ router.put('/:id', auth, async (req, res) => {
 			.then(async (settings) => {
 				objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
 				objekt.data.message = await getMessage(messageId);
-				// console.log(objekt.emoticons);
-				const socket = require('socket.io-client')('http://localhost:7000');
-				socket.on('connect', () => {
-					socket.emit('settings', objekt);
-				});
+				// Send live info to client
+				io.emit('newSettings', objekt);
+
 				res.json({
 					error: false,
 					data: settings,
@@ -340,11 +348,9 @@ router.put('/:id', auth, async (req, res) => {
 				objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
 				objekt.data.message = await getMessage(messageId);
 
-				// console.log(objekt.emoticons);
-				const socket = require('socket.io-client')('http://localhost:7000');
-				socket.on('connect', () => {
-					socket.emit('settings', objekt);
-				});
+				// Send live info to client
+				io.emit('newSettings', objekt);
+
 				res.status(201).json({
 					error: false,
 					data: settings,
