@@ -58,7 +58,6 @@ router.post('/', auth, (req, res) => {
                 data: [],
                 message: error,
             }));
-
         }
     });
 });
