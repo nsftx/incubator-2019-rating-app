@@ -86,6 +86,7 @@ router.post('/:settingId', auth, async (req, res) => {
             error: true,
             message: error,
         }));
+    return 1;
 });
 
 router.put('/:id', auth, (req, res) => {
