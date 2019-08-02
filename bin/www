@@ -29,9 +29,9 @@ app.set('port', port);
 
 const server = http.createServer(app);
 
-const srv = http.createServer();
+// const srv = http.createServer();
 
-global[uuid].io = require('socket.io')(srv);
+global[uuid].io = require('socket.io')(server);
 
 const PORT = 7000;
 global[uuid].io.listen(PORT);
