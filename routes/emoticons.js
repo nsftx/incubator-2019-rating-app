@@ -1,128 +1,22 @@
 const express = require('express');
 
 const router = express.Router();
-const model = require('../models/index');
-// var sequelize = require('sequelize')
 const auth = require('../middleware/auth');
+const emoticonsController = require('../controllers/emoticons');
 
-
-router.get('/', auth, (req, res) => {
-  model.emoticons.findAll().then(emoticons => res.json({
-      error: false,
-      data: emoticons,
-    }))
-    .catch(error => res.json({
-      error: true,
-      data: [],
-      message: error,
-    }));
-});
-
+// GET all emoticons
+router.get('/', auth, emoticonsController.getAllEmoticons);
 
 // Emoticons POST
-router.post('/', auth, (req, res) => {
-  const {
-    name,
-    symbol,
-    emoticonsGroupId,
-    value,
-  } = req.body;
-  model.emoticons.create({
-      name,
-      symbol,
-      emoticonsGroupId,
-      value,
-    })
-    .then(emoticons => res.status(201).json({
-      error: false,
-      data: emoticons,
-      message: 'New emoticon has been created.',
-    }))
-    .catch(error => res.json({
-      error: true,
-      data: [],
-      message: error,
-    }));
-});
+router.post('/', auth, emoticonsController.createEmoticon);
 
 // Emoticons UPDATE
-
-router.put('/:id', auth, (req, res) => {
-  const {
-    id,
-  } = req.params;
-
-  const {
-    name,
-    symbol,
-    emoticonsGroupId,
-    value,
-  } = req.body;
-
-  model.emoticons.update({
-      name,
-      symbol,
-      emoticonsGroupId,
-      value,
-    }, {
-      where: {
-        id,
-      },
-    })
-    .then(emoticons => res.json({
-      error: false,
-      data: emoticons,
-      message: 'Emoticon has been updated.',
-    }))
-    .catch(error => res.json({
-      error: true,
-      message: error,
-    }));
-});
+router.put('/:id', auth, emoticonsController.updateEmoticon);
 
 // get one
-router.get('/:id', auth, (req, res) => {
-  const EmoticonsId = req.params.id;
-
-  model.settings.findOne({
-      where: {
-        id: EmoticonsId,
-      },
-      include: [{
-        model: model.emoticonsGroups,
-
-
-      }],
-    })
-    .then(emoticons => res.json({
-      error: false,
-      data: emoticons,
-    }))
-    .catch(error => res.json({
-      error: true,
-      message: error,
-    }));
-});
-
+router.get('/:id', auth, emoticonsController.getOneEmoticon);
 
 // delete
-router.delete('/:id', auth, (req, res) => {
-  const EmoticonsId = req.params.id;
-
-  model.emoticons.destroy({
-      where: {
-        id: EmoticonsId,
-      },
-    })
-    .then(status => res.json({
-      error: false,
-      data: status,
-      message: 'Emoticon has been deleted.',
-    }))
-    .catch(error => res.json({
-      error: true,
-      message: error,
-    }));
-});
+router.delete('/:id', auth, emoticonsController.deleteEmoticon);
 
 module.exports = router;
