@@ -20,7 +20,7 @@ exports.createMessage = async (req, res) => {
 
 
     if (text.length < 3 || text.length > 120) {
-        res.json({
+        res.status(400).json({
             error: true,
             message: 'Text must be between 3 and 120 characters!',
         });
@@ -50,7 +50,7 @@ exports.createMessageForSettings = async (req, res) => {
     const settingId = req.params.settingId;
 
     if (text.length < 3 || text.length > 120) {
-        return res.json({
+        return res.status(400).json({
             error: true,
             message: 'Text must be between 3 and 120 characters!',
         });
@@ -87,29 +87,29 @@ exports.updateMessage = async (req, res) => {
     } = req.body;
 
     if (text.length < 3 || text.length > 120) {
-        res.json({
+        return res.status(400).json({
             error: true,
             message: 'Text must be between 3 and 120 characters!',
         });
-    } else {
-        model.messages.update({
-                text,
-                language,
-            }, {
-                where: {
-                    id: messageId,
-                },
-            })
-            .then(messages => res.json({
-                error: false,
-                data: messages,
-                message: 'Message has been updated!',
-            }))
-            .catch(error => res.json({
-                error: true,
-                message: error,
-            }));
     }
+    model.messages.update({
+            text,
+            language,
+        }, {
+            where: {
+                id: messageId,
+            },
+        })
+        .then(messages => res.json({
+            error: false,
+            data: messages,
+            message: 'Message has been updated!',
+        }))
+        .catch(error => res.json({
+            error: true,
+            message: error,
+        }));
+    return 1;
 };
 exports.getMessageByLanguage = async (req, res) => {
     const lang = req.params;

@@ -28,8 +28,7 @@ exports.userlogin = async (req, res) => {
             // Or, if multiple clients access the backend:
             // [CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
         });
-        const payload = ticket.getPayload();
-        const user = payload;
+        const user = ticket.getPayload();
 
         model.users.findOne({
             where: {
