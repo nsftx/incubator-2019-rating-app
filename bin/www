@@ -8,11 +8,11 @@
 const debug = require('debug')('app-sequelize:server');
 const http = require('http');
 const cors = require('cors');
-const uuid = require('uuid');
+
 const app = require('../app');
 
 
-global[uuid] = {};
+
 
 app.use(cors());
 
@@ -31,10 +31,9 @@ const server = http.createServer(app);
 
 // const srv = http.createServer();
 
-global[uuid].io = require('socket.io')(server);
 
-const PORT = 7000;
-global[uuid].io.listen(PORT);
+
+
 
 /**
  * Listen on provided port, on all network interfaces.
