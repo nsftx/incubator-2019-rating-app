@@ -72,7 +72,11 @@ exports.getLastSettings = async (req, res) => {
                     as: 'message',
                     attributes: ['id', 'text', 'language'],
                 },
-
+                {
+                    model: model.emoticonsGroups,
+                    as: 'emoticonsGroup',
+                    attributes: ['name'],
+                },
             ],
         })
         .then(async (settings) => {
@@ -154,7 +158,7 @@ exports.createSettings = async (req, res) => {
     objekt.data = req.body;
     if (typeof (emoticonNumber) !== 'undefined') {
         if (emoticonNumber < 3 || emoticonNumber > 5) {
-            res.json({
+            res.status(400).json({
                 error: true,
                 message: 'Number of emoticons not in specified range!',
             });
@@ -164,7 +168,7 @@ exports.createSettings = async (req, res) => {
 
     if (typeof (messageTimeout) !== 'undefined') {
         if (messageTimeout < 0 || messageTimeout > 10) {
-            res.json({
+            res.status(400).json({
                 error: true,
                 message: 'Message timeout should be in range 0-10 sec!',
             });
@@ -212,7 +216,7 @@ exports.updateSettings = async (req, res) => {
 
     if (typeof (emoticonNumber) !== 'undefined') {
         if (emoticonNumber < 3 || emoticonNumber > 5) {
-            res.json({
+            res.status(400).json({
                 error: true,
                 message: 'Number of emoticons not in specified range!',
             });
@@ -222,7 +226,7 @@ exports.updateSettings = async (req, res) => {
 
     if (typeof (messageTimeout) !== 'undefined') {
         if (messageTimeout < 0 || messageTimeout > 10) {
-            res.json({
+            res.status(400).json({
                 error: true,
                 message: 'Message timeout should be in range 0-10 sec!',
             });

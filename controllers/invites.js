@@ -18,7 +18,7 @@ exports.sendInvite = async (req, res) => {
     } = req.body;
 
     if (!emailIsValid(email)) {
-        return res.json({
+        return res.status(400).json({
             error: true,
             message: 'Invalid email',
             data: email,
