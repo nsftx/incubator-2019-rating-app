@@ -1,6 +1,5 @@
-const uuid = require('uuid');
 const model = require('../models/index');
-
+const io = require('../server');
 
 const getEmoticonsForSettings = async (emoticonsGroupId, emoticonNumber) => {
     const emoticons = await model.emoticons.findAll({
@@ -186,7 +185,7 @@ exports.createSettings = async (req, res) => {
         .then(async (settings) => {
             objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
             // Send live info to client
-            global[uuid].io.emit('newSettings', objekt);
+           io.emit('newSettings', objekt);
 
             return res.json({
                 error: false,
@@ -266,7 +265,7 @@ exports.updateSettings = async (req, res) => {
                 objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
                 objekt.data.message = await getMessage(messageId);
                 // Send live info to client
-                global[uuid].io.emit('newSettings', objekt);
+                io.emit('newSettings', objekt);
 
                 res.json({
                     error: false,
@@ -291,7 +290,7 @@ exports.updateSettings = async (req, res) => {
                 objekt.data.message = await getMessage(messageId);
 
                 // Send live info to client
-                global[uuid].io.emit('newSettings', objekt);
+                io.emit('newSettings', objekt);
 
                 res.status(201).json({
                     error: false,
