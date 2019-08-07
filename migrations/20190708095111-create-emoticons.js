@@ -1,4 +1,3 @@
-'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('emoticons', {
@@ -6,42 +5,42 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       name: {
         type: Sequelize.STRING(50),
-        allowNull: false
+        allowNull: false,
       },
       symbol: {
         type: Sequelize.STRING(50),
-        allowNull: false
+        allowNull: false,
       },
       emoticonsGroupId: {
         type: Sequelize.INTEGER,
         references: {
           model: {
-            tableName: 'emoticonsGroups'
+            tableName: 'emoticonsGroups',
           },
-          key: 'id'
+          key: 'id',
         },
-        allowNull: false
+        allowNull: false,
       },
 
       createdAt: {
         type: 'TIMESTAMP',
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-        allowNull: false
+        allowNull: false,
 
       },
       updatedAt: {
         type: 'TIMESTAMP',
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
-        allowNull: false
+        allowNull: false,
 
       }
     });
   },
   down: (queryInterface) => {
     return queryInterface.dropTable('emoticons');
-  }
+  },
 };
