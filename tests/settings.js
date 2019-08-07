@@ -7,6 +7,7 @@ const model = require('../models/index');
 
 const server = require('../bin/www');
 
+// eslint-disable-next-line no-unused-vars
 const should = chai.should();
 
 chai.use(chaiHttp);
@@ -30,28 +31,21 @@ describe('/GET all settings', () => {
 });
 
 describe('/GET/:id last setting', () => {
-    it('it should GET last settings', async () => {
-        const settings = await model.settings.findOne({
-            order: [
-                ['createdAt', 'DESC'],
-            ],
-            raw: true,
-        });
-
-
+    it('it should GET last settings', (done) => {
         chai.request(server)
-        .get('/settings/last')
-        .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.a('object');
-            res.body.should.have.property('error');
-            res.body.should.have.property('data');
-            res.body.should.have.property('data');
-            res.body.error.should.be.eql(false);
-            res.body.data.should.be.a('object');
-            res.body.error.should.be.a('boolean');
-        });
-});
+            .get('/settings/last')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.should.have.property('data');
+                res.body.should.have.property('data');
+                res.body.error.should.be.eql(false);
+                res.body.data.should.be.a('object');
+                res.body.error.should.be.a('boolean');
+                done();
+            });
+    });
 });
 
 describe('/GET/:id one setting', () => {
@@ -65,30 +59,30 @@ describe('/GET/:id one setting', () => {
 
 
         chai.request(server)
-        .get(`/settings/${settings.id}`)
-        .set('Authorization', '123')
-        .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.a('object');
-            res.body.should.have.property('error');
-            res.body.should.have.property('data');
-            res.body.should.have.property('data');
-            res.body.error.should.be.eql(false);
-            res.body.data.should.be.a('object');
-            res.body.error.should.be.a('boolean');
-        });
+            .get(`/settings/${settings.id}`)
+            .set('Authorization', '123')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.should.have.property('data');
+                res.body.should.have.property('data');
+                res.body.error.should.be.eql(false);
+                res.body.data.should.be.a('object');
+                res.body.error.should.be.a('boolean');
+            });
     });
 });
 describe('/POST one message', () => {
     it('it should not POST an settings with emoticon number greater then 5 and lower than 3', (done) => {
-       const emoticonNumber = 2;
+        const emoticonNumber = 2;
 
         const settings = {
             emoticonNumber,
-        messageId: 1,
-        messageTimeout: 10,
-        emoticonsGroupId: 27,
-        userId: 12,
+            messageId: 1,
+            messageTimeout: 10,
+            emoticonsGroupId: 27,
+            userId: 12,
         };
         chai.request(server)
             .post('/settings')
@@ -110,11 +104,11 @@ describe('/POST one message', () => {
         const messageTimeout = 11;
 
         const settings = {
-        emoticonNumber: 4,
-        messageId: 1,
-        messageTimeout,
-        emoticonsGroupId: 27,
-        userId: 12,
+            emoticonNumber: 4,
+            messageId: 1,
+            messageTimeout,
+            emoticonsGroupId: 27,
+            userId: 12,
         };
 
         chai.request(server)
@@ -135,35 +129,34 @@ describe('/POST one message', () => {
 
     it('it should POST one setting', (done) => {
         const settings = {
-        emoticonNumber: 5,
-        messageId: 4,
-        messageTimeout: 4,
-        emoticonsGroupId: 27,
-        userId: 12,
+            emoticonNumber: 5,
+            messageId: 4,
+            messageTimeout: 4,
+            emoticonsGroupId: 27,
+            userId: 12,
         };
 
         chai.request(server)
-                .post('/settings')
-                .set('Authorization', '123')
-                .send(settings)
-                .end((err, res) => {
-                    res.should.have.status(200);
-                    res.body.should.be.a('object');
-                    res.body.should.have.property('error');
-                    res.body.error.should.be.eql(false);
-                    res.body.error.should.be.a('boolean');
-                    res.body.should.have.property('message')
-                        .eql('Settings have ben updated.');
-                    res.body.data.should.have.property('emoticonNumber');
-                    res.body.data.should.have.property('messageId');
-                    res.body.data.should.have.property('messageTimeout');
-                    res.body.data.should.have.property('emoticonsGroupId');
-                    res.body.data.should.have.property('userId');
-                    done();
-                });
-        });
-
-    });  
+            .post('/settings')
+            .set('Authorization', '123')
+            .send(settings)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(false);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message')
+                    .eql('Settings have ben updated.');
+                res.body.data.should.have.property('emoticonNumber');
+                res.body.data.should.have.property('messageId');
+                res.body.data.should.have.property('messageTimeout');
+                res.body.data.should.have.property('emoticonsGroupId');
+                res.body.data.should.have.property('userId');
+                done();
+            });
+    });
+});
 
 describe('/POST one message', () => {
     it('it should UPDATE one setting', async () => {
@@ -189,7 +182,7 @@ describe('/POST one message', () => {
                     .eql('Settings have been updated.');
                 res.body.data[0].should.be.eql(1);
             });
-});
+    });
 });
 
 describe('/DELETE one setting', () => {
