@@ -1,0 +1,149 @@
+process.env.NODE_ENV = 'test';
+
+const chai = require('chai');
+const chaiHttp = require('chai-http');
+
+const model = require('../models/index');
+
+const server = require('../bin/www');
+// eslint-disable-next-line no-unused-vars
+const should = chai.should();
+
+chai.use(chaiHttp);
+
+describe('/GET all emoticonsGroups', () => {
+    it('it should GET all the emoticons', (done) => {
+        chai.request(server)
+            .get('/emoticonsGroups')
+            .set('Authorization', '123')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.should.have.property('data');
+                res.body.error.should.be.eql(false);
+                res.body.data.should.be.a('array');
+                res.body.error.should.be.a('boolean');
+                done();
+            });
+    });
+});
+
+describe('/GET/:id one emoticonsGroup', () => {
+    it('it should GET one emoticonGroup by the given id', async () => {
+        const emoticonsGroups = await model.emoticonsGroups.findOne({
+            order: [
+                ['id', 'ASC'],
+            ],
+            raw: true,
+        });
+        chai.request(server)
+            .get(`/emoticonsGroups/${emoticonsGroups.id}`)
+            .set('Authorization', '123')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.should.have.property('data');
+                res.body.error.should.be.eql(false);
+                res.body.data.should.be.a('object');
+                res.body.error.should.be.a('boolean');
+            });
+    });
+});
+
+describe('/POST one emoticonsGroup', () => {
+    it('it should not POST an emoticonGroup without name', (done) => {
+        const emoticon = {};
+        chai.request(server)
+            .post('/emoticonsGroups')
+            .set('Authorization', '123')
+            .send(emoticon)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                res.body.data.length.should.be.eql(0);
+                done();
+            });
+    });
+    it('it should POST an emoticonGroup', (done) => {
+        const emoticon = {
+            name: 'test',
+        };
+        chai.request(server)
+            .post('/emoticonsGroups')
+            .set('Authorization', '123')
+            .send(emoticon)
+            .end((err, res) => {
+                res.should.have.status(201);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(false);
+                res.body.error.should.be.a('boolean');
+
+                res.body.should.have.property('message')
+                    .eql('New emoticon group has been created.');
+                res.body.data.should.have.property('name');
+                res.body.data.should.have.property('createdAt');
+                res.body.data.should.have.property('updatedAt');
+                done();
+            });
+    });
+});
+
+describe('/PUT one emoticonsGroup', () => {
+    it('it should UPDATE one emoticonGroup', async () => {
+        const emoticonsGroup = await model.emoticonsGroups.findOne({
+            where: {
+                name: 'test',
+            },
+            raw: true,
+        });
+        emoticonsGroup.name = 'test 2';
+        chai.request(server)
+            .put(`/emoticonsGroups/${emoticonsGroup.id}`)
+            .set('Authorization', '123')
+            .send(emoticonsGroup)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(false);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message')
+                    .eql('Emoticons group has been updated.');
+                res.body.data[0].should.be.eql(1);
+            });
+    });
+});
+
+describe('/DELETE one emoticonsGroup', () => {
+    it('it should DELETE one emoticonGroup', async () => {
+        const emoticonsGroup = await model.emoticonsGroups.findOne({
+            where: {
+                name: 'test 2',
+            },
+            order: [
+                ['id', 'DESC'],
+            ],
+            raw: true,
+        });
+        chai.request(server)
+            .delete(`/emoticonsGroups/${emoticonsGroup.id}`)
+            .set('Authorization', '123')
+            .send(emoticonsGroup)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                /* res.body.error.should.be.false;
+                res.body.error.should.be.a('boolean'); */
+                res.body.should.have.property('message')
+                    .eql('Emoticons group has been deleted.');
+            });
+    });
+});

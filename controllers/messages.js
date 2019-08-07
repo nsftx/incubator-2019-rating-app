@@ -32,7 +32,7 @@ exports.createMessage = async (req, res) => {
             .then(messages => res.status(201).json({
                 error: false,
                 data: messages,
-                message: 'New message have been created.',
+                message: 'New message has been created.',
             }))
             .catch(error => res.json({
                 error: true,
@@ -156,7 +156,7 @@ exports.deleteMessage = async (req, res) => {
         .then(message => res.json({
             error: false,
             data: message,
-            message: 'Message has been deleted',
+            message: 'Message has been deleted.',
         }))
         .catch(error => res.json({
             error: true,
