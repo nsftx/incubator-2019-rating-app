@@ -52,7 +52,7 @@ exports.userlogin = async (req, res) => {
                 },
             }).then((existingInvite) => {
                 if (!existingInvite) {
-                    return res.json({
+                    return res.status(400).json({
                         error: true,
                         data: 'update error',
                         message: 'Invitation for user does not exist',

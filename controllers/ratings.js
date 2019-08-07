@@ -429,7 +429,7 @@ exports.createRating = async (req, res) => {
     const settings = await getCurrentSettings();
 
     if (emoticon.emoticonsGroupId !== settings.emoticonsGroupId) {
-        res.json({
+        res.status(400).json({
             error: true,
             message: 'Emoticon not valid!',
         });
