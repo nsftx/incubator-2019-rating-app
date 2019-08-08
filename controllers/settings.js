@@ -185,7 +185,7 @@ exports.createSettings = async (req, res) => {
         .then(async (settings) => {
             objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
             // Send live info to client
-           io.emit('newSettings', objekt);
+            io.emit('newSettings', objekt);
 
             return res.json({
                 error: false,
@@ -213,23 +213,26 @@ exports.updateSettings = async (req, res) => {
     objekt.data = req.body;
 
 
-    if (typeof (emoticonNumber) !== 'undefined') {
+    if (emoticonNumber && !(isNaN(emoticonNumber))) {
         if (emoticonNumber < 3 || emoticonNumber > 5) {
-            res.status(400).json({
+            return res.status(400).json({
                 error: true,
                 message: 'Number of emoticons not in specified range!',
             });
-            return;
         }
+    } else {
+        return res.status(400).json({
+            error: true,
+            message: 'Number of emoticons not set!',
+        });
     }
 
-    if (typeof (messageTimeout) !== 'undefined') {
+    if (messageTimeout) {
         if (messageTimeout < 0 || messageTimeout > 10) {
-            res.status(400).json({
+            return res.status(400).json({
                 error: true,
                 message: 'Message timeout should be in range 0-10 sec!',
             });
-            return;
         }
     }
 

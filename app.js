@@ -31,14 +31,14 @@ app.use(express.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/settings', settingsRouter);
-app.use('/ratings', ratingsRouter);
-app.use('/messages', messagesRouter);
-app.use('/emoticons', emoticonsRouter);
-app.use('/emoticonsGroups', emoticonsGroupsRouter);
-app.use('/invites', InvitesRouter);
+app.use('/api/v1/', indexRouter);
+app.use('/api/v1/users', usersRouter);
+app.use('/api/v1/settings', settingsRouter);
+app.use('/api/v1/ratings', ratingsRouter);
+app.use('/api/v1/messages', messagesRouter);
+app.use('/api/v1/emoticons', emoticonsRouter);
+app.use('/api/v1/emoticonsGroups', emoticonsGroupsRouter);
+app.use('/api/v1/invites', InvitesRouter);
 
 
 // catch 404 and forward to error handler
