@@ -23,6 +23,7 @@
     "nodemailer": "^6.3.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
+    "rewire": "^4.0.1",
     "sequelize": "^5.9.2",
     "sequelize-fixtures": "^1.0.2",
     "socket.io": "^2.2.0",
