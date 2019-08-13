@@ -33,7 +33,7 @@ exports.sendInvite = async (req, res) => {
         .then(async (existingInvite) => {
             if (existingInvite) {
                 // console.log('user is: ', currentUser);
-                res.res.status(400).json({
+                res.status(400).json({
                     error: true,
                     message: 'Invitation already exists!',
                     data: existingInvite,

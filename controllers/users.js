@@ -71,20 +71,17 @@ exports.userlogin = async (req, res) => {
                         existingUser: false,
                         data: newUser,
                     });
-                }).catch(error => res.json({
+                }).catch(() => res.json({
                     error: true,
-                    data: 'create error',
-                    message: error,
+                    message: 'Error creating user!',
                 }));
-            }).catch(error => res.json({
+            }).catch(() => res.json({
                 error: true,
-                data: 'login error',
-                message: error,
+                message: 'Login error!',
             }));
-        }).catch(error => res.json({
+        }).catch(() => res.json({
             error: true,
-            data: 'current user',
-            message: error,
+            message: 'Finding user error!',
         }));
     }
     verify().catch(error => res.json({
