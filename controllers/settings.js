@@ -213,7 +213,7 @@ exports.updateSettings = async (req, res) => {
     objekt.data = req.body;
 
 
-    if (emoticonNumber && !(isNaN(emoticonNumber))) {
+    if (emoticonNumber && !(Number.isNaN(emoticonNumber))) {
         if (emoticonNumber < 3 || emoticonNumber > 5) {
             return res.status(400).json({
                 error: true,

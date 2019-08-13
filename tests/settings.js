@@ -1,9 +1,18 @@
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable prefer-destructuring */
 process.env.NODE_ENV = 'test';
 
-
+const rewire = require('rewire');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+const assert = require('chai').assert;
 const model = require('../models/index');
+
+
+const settingsRewire = rewire('../controllers/settings.js');
+/* const hasProps = userRewire.__get__('hasProps') */
+const getEmoticonsForSettings = settingsRewire.__get__('getEmoticonsForSettings');
+const getMessage = settingsRewire.__get__('getMessage');
 
 const server = require('../bin/www');
 
@@ -12,10 +21,48 @@ const should = chai.should();
 
 chai.use(chaiHttp);
 
+const getEmoticonsGroup = async () => {
+    const emoticonsGroup = await model.emoticonsGroups.findOne({
+        order: [
+            ['createdAt', 'ASC'],
+        ],
+        raw: true,
+    });
+    return emoticonsGroup.id;
+};
+const getSettings = async () => {
+    const settings = await model.settings.findOne({
+        order: [
+            ['createdAt', 'ASC'],
+        ],
+        raw: true,
+    });
+    return settings;
+};
+
+describe('get emoticons for settings', () => {
+    it('Should return array with 3-5 elements', async () => {
+        const group = await getEmoticonsGroup();
+        const settings = await getSettings();
+        const data = await getEmoticonsForSettings(group, settings.emoticonNumber);
+        assert.isAtLeast(data.length, 3);
+        assert.isArray(data);
+    });
+});
+
+describe('get message for settings', () => {
+    it('Should return message object with all keys', async () => {
+        const settings = await getSettings();
+        const data = await getMessage(settings.messageId);
+        assert.isObject(data);
+        assert.hasAllKeys(data, ['id', 'text']);
+    });
+});
+
 describe('/GET all settings', () => {
     it('it should GET all the settings', (done) => {
         chai.request(server)
-            .get('/settings')
+            .get('/api/v1/settings')
             .set('Authorization', '123')
             .end((err, res) => {
                 res.should.have.status(200);
@@ -33,7 +80,7 @@ describe('/GET all settings', () => {
 describe('/GET/:id last setting', () => {
     it('it should GET last settings', (done) => {
         chai.request(server)
-            .get('/settings/last')
+            .get('/api/v1/settings/last')
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.a('object');
@@ -59,7 +106,7 @@ describe('/GET/:id one setting', () => {
 
 
         chai.request(server)
-            .get(`/settings/${settings.id}`)
+            .get(`/api/v1/settings/${settings.id}`)
             .set('Authorization', '123')
             .end((err, res) => {
                 res.should.have.status(200);
@@ -85,7 +132,7 @@ describe('/POST one message', () => {
             userId: 12,
         };
         chai.request(server)
-            .post('/settings')
+            .post('/api/v1/settings')
             .set('Authorization', '123')
             .send(settings)
             .end((err, res) => {
@@ -112,7 +159,7 @@ describe('/POST one message', () => {
         };
 
         chai.request(server)
-            .post('/settings')
+            .post('/api/v1/settings')
             .set('Authorization', '123')
             .send(settings)
             .end((err, res) => {
@@ -137,7 +184,7 @@ describe('/POST one message', () => {
         };
 
         chai.request(server)
-            .post('/settings')
+            .post('/api/v1/settings')
             .set('Authorization', '123')
             .send(settings)
             .end((err, res) => {
@@ -169,18 +216,17 @@ describe('/POST one message', () => {
         settings.messageTimeout = 5;
         settings.emoticonNumber = 3;
         chai.request(server)
-            .put(`/settings/${settings.id}`)
+            .put(`/api/v1/settings/${settings.id}`)
             .set('Authorization', '123')
             .send(settings)
             .end((err, res) => {
-                res.should.have.status(200);
+                res.should.have.status(201);
                 res.body.should.be.a('object');
                 res.body.should.have.property('error');
                 res.body.error.should.be.eql(false);
                 res.body.error.should.be.a('boolean');
                 res.body.should.have.property('message')
-                    .eql('Settings have been updated.');
-                res.body.data[0].should.be.eql(1);
+                    .eql('Settings have been created.');
             });
     });
 });
@@ -195,7 +241,7 @@ describe('/DELETE one setting', () => {
         });
 
         chai.request(server)
-            .delete(`/settings/${settings.id}`)
+            .delete(`/api/v1/settings/${settings.id}`)
             .set('Authorization', '123')
             .end((err, res) => {
                 res.should.have.status(200);
