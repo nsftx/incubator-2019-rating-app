@@ -71,8 +71,7 @@ const slackPush = (averageRating) => {
     })();
 };
 const checkRatingsStatus = async (settings) => {
-    const datum = new Date();
-    const date = moment(String(datum)).format('YYYY-MM-DD');
+    const date = moment().format('YYYY-MM-DD');
     const ratingsCount = await model.ratings.findOne({
         where: {
             settingId: settings.id,
@@ -480,7 +479,7 @@ exports.updateRating = async (req, res) => {
 exports.deleteRating = async (req, res) => {
     const ratingId = req.params.id;
 
-    model.ratings.delete({
+    model.ratings.destroy({
             where: {
                 id: ratingId,
             },
