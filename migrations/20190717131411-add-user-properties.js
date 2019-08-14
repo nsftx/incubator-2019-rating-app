@@ -2,7 +2,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     try {
       await queryInterface.addColumn('users', 'googleId', {
-        type: Sequelize.BIGINT,
+        type: Sequelize.STRING(30),
         allowNull: false,
       });
       await queryInterface.addColumn('users', 'first_name', {
