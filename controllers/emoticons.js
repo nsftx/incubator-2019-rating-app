@@ -77,12 +77,12 @@ exports.updateEmoticon = async (req, res) => {
         value,
     } = req.body;
 
-    const finder = await model.emoticons.findOne({
+    const emoticonExist = await model.emoticons.findOne({
         where: {
             id: req.params.id,
         },
     });
-    if (!finder) {
+    if (!emoticonExist) {
         return res.json({
             error: true,
             data: {},
