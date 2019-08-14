@@ -21,15 +21,6 @@ const should = chai.should();
 
 chai.use(chaiHttp);
 
-const getEmoticonsGroup = async () => {
-    const emoticonsGroup = await model.emoticonsGroups.findOne({
-        order: [
-            ['createdAt', 'ASC'],
-        ],
-        raw: true,
-    });
-    return emoticonsGroup.id;
-};
 const getSettings = async () => {
     const settings = await model.settings.findOne({
         order: [
@@ -42,10 +33,11 @@ const getSettings = async () => {
 
 describe('get emoticons for settings', () => {
     it('Should return array with 3-5 elements', async () => {
-        const group = await getEmoticonsGroup();
         const settings = await getSettings();
-        const data = await getEmoticonsForSettings(group, settings.emoticonNumber);
+        const data = await getEmoticonsForSettings(settings.emoticonsGroupId,
+            settings.emoticonNumber);
         assert.isAtLeast(data.length, 3);
+        assert.isAtMost(data.length, 5);
         assert.isArray(data);
     });
 });
