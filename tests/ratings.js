@@ -1,8 +1,11 @@
+/* eslint-disable no-underscore-dangle */
 process.env.NODE_ENV = 'test';
 
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+const assert = require('chai').assert;
 const moment = require('moment');
+const rewire = require('rewire');
 const model = require('../models/index');
 
 const server = require('../bin/www');
@@ -11,6 +14,57 @@ const server = require('../bin/www');
 const should = chai.should();
 
 chai.use(chaiHttp);
+const ratingsRewire = rewire('../controllers/ratings.js');
+
+const getCurrentSettings = ratingsRewire.__get__('getCurrentSettings');
+const getEmoticons = ratingsRewire.__get__('getEmoticons');
+const getEmoticonsForSettings = ratingsRewire.__get__('getEmoticonsForSettings');
+
+const getSettings = async () => {
+    const settings = await model.settings.findOne({
+        order: [
+            ['createdAt', 'ASC'],
+        ],
+        raw: true,
+    });
+    return settings;
+};
+
+describe('get current settings', () => {
+    it('Should return an object', async () => {
+        const data = await getCurrentSettings();
+        assert.isObject(data);
+    });
+});
+
+describe('get emoticons', () => {
+    it('Should return an array', async () => {
+        const settings = await getSettings();
+        const data = await getEmoticons(settings.emoticonsGroupId);
+        assert.isArray(data);
+        assert.equal(data.length, 5);
+    });
+});
+
+describe('get emoticons for settings', () => {
+    it('Should return array with 3-5 elements', async () => {
+        const settings = await getSettings();
+        const data = await getEmoticonsForSettings(settings.emoticonsGroupId,
+            settings.emoticonNumber);
+        assert.isAtLeast(data.length, 3);
+        assert.isAtMost(data.length, 5);
+        assert.isArray(data);
+    });
+});
+
+describe('get emoticons', () => {
+    it('Should return an array', async () => {
+        const settings = await getSettings();
+        const data = await getEmoticons(settings.emoticonsGroupId);
+        assert.isArray(data);
+        assert.equal(data.length, 5);
+    });
+});
 
 // REQUEST takes too much time and is not used
 
@@ -40,7 +94,7 @@ describe('/POST ratings by hour', () => {
         };
         const dataLength = 24 / body.interval;
         chai.request(server)
-            .post('/ratings/range')
+            .post('/api/v1/ratings/range')
             .set('Authorization', '123')
             .send(body)
             .end((err, res) => {
@@ -69,7 +123,7 @@ describe('/POST ratings by days', () => {
         const dataLength = end.diff(start, 'days') + 1;
         console.log('length:', dataLength);
         chai.request(server)
-            .post('/ratings/days')
+            .post('/api/v1/ratings/days')
             .set('Authorization', '123')
             .send(body)
             .end((err, res) => {
@@ -95,7 +149,7 @@ describe('/POST ratings count for more days', () => {
             endDate: '2019-08-10',
         };
         chai.request(server)
-            .post('/ratings/report')
+            .post('/api/v1/ratings/report')
             .set('Authorization', '123')
             .send(body)
             .end((err, res) => {
@@ -106,10 +160,10 @@ describe('/POST ratings count for more days', () => {
                 res.body.error.should.be.eql(false);
                 res.body.data.should.be.a('array');
                 res.body.error.should.be.a('boolean');
-                res.body.data.length.should.be.lte(5);
-                res.body.data.length.should.be.gte(3);
+                res.body.emoticons.length.should.be.lte(5);
+                res.body.emoticons.length.should.be.gte(3);
                 res.body.emoticons.should.be.a('array');
-                res.body.data.length.should.be.eql(res.body.emoticons.length);
+                res.body.data.length.should.be.lte(res.body.emoticons.length);
                 done();
             });
     });
@@ -121,7 +175,7 @@ describe('/POST ratings count one day', () => {
             date: '2019-08-06',
         };
         chai.request(server)
-            .post('/ratings/count')
+            .post('/api/v1/ratings/count')
             .set('Authorization', '123')
             .send(body)
             .end((err, res) => {
@@ -157,7 +211,7 @@ describe('/POST ratings', () => {
         };
 
         chai.request(server)
-            .post('/ratings')
+            .post('/api/v1/ratings')
             .set('Authorization', '123')
             .send(body)
             .end((err, res) => {
@@ -184,7 +238,7 @@ describe('/DELETE one rating', () => {
             raw: true,
         });
         chai.request(server)
-            .delete(`/ratings/${rating.id}`)
+            .delete(`/api/v1/ratings/${rating.id}`)
             .set('Authorization', '123')
             .end((err, res) => {
                 res.should.have.status(200);
