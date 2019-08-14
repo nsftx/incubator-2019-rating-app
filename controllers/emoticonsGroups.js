@@ -2,12 +2,12 @@ const model = require('../models/index');
 
 exports.getAllGroups = async (req, res) => {
     model.emoticonsGroups.findAll({
-            include: [model.emoticons],
-            order: [
-                ['id', 'DESC'],
-            ],
-            limit: 4,
-        })
+        include: [model.emoticons],
+        order: [
+            ['id', 'DESC'],
+        ],
+        limit: 4,
+    })
         .then(emoticonsGroups => res.json({
             error: false,
             data: emoticonsGroups,
@@ -22,11 +22,17 @@ exports.createGroup = async (req, res) => {
     const {
         name,
     } = req.body;
+
+    if (!name) {
+        return res.json({
+            error: true,
+            data: {},
+            message: 'Name not defined',
+        });
+    }
     model.emoticonsGroups.create({
-            name,
-
-        })
-
+        name,
+    })
         .then(emoticonsGroups => res.status(201).json({
             error: false,
             data: emoticonsGroups,
@@ -43,9 +49,24 @@ exports.createMany = async (req, res) => {
         name,
         emoticonsArray,
     } = req.body;
+
+    if (!name) {
+        return res.json({
+            error: true,
+            data: {},
+            message: 'Name not defined',
+        });
+    }
+    if (!emoticonsArray) {
+        return res.json({
+            error: true,
+            data: {},
+            message: 'emoticonsArray not defined',
+        });
+    }
     await model.emoticonsGroups.create({
-            name,
-        })
+        name,
+    })
         .then((group) => {
             if (typeof (emoticonsArray) !== 'undefined') {
                 if (emoticonsArray.length < 3 || emoticonsArray.length > 5) {
@@ -85,9 +106,22 @@ exports.updateGroup = async (req, res) => {
         name,
     } = req.body;
 
+    const finder = await model.emoticonsGroups.findOne({
+        where: {
+            id: req.params.id,
+        },
+    });
+    if (!finder) {
+        return res.json({
+            error: true,
+            data: {},
+            message: 'No emoticonsGroup with that Id',
+        });
+    }
+
     model.emoticonsGroups.update({
-            name,
-        }, {
+        name,
+    }, {
             where: {
                 id: emoticonsGroupID,
             },
@@ -106,10 +140,10 @@ exports.deleteGroup = async (req, res) => {
     const emoticonsGroupId = req.params.id;
 
     model.emoticonsGroups.destroy({
-            where: {
-                id: emoticonsGroupId,
-            },
-        })
+        where: {
+            id: emoticonsGroupId,
+        },
+    })
         .then(status => res.json({
             error: false,
             data: status,
