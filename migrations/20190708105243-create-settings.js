@@ -5,15 +5,15 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER.UNSIGNED,
       },
       emoticonNumber: {
         allowNull: false,
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
         defaultValue: 3,
       },
       messageId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER.UNSIGNED,
         references: {
           model: {
             tableName: 'messages',
@@ -23,7 +23,7 @@ module.exports = {
         allowNull: true,
       },
       emoticonsGroupId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER.UNSIGNED,
         references: {
           model: {
             tableName: 'emoticonsGroups',
@@ -33,7 +33,7 @@ module.exports = {
         allowNull: false,
       },
       userId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER.UNSIGNED,
         references: {
           model: {
             tableName: 'users',
@@ -44,7 +44,7 @@ module.exports = {
       },
       messageTimeout: {
         allowNull: false,
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
         defaultValue: 5,
       },
       createdAt: {

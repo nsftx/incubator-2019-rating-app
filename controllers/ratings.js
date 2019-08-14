@@ -2,7 +2,9 @@
 const sequelize = require('sequelize');
 const request = require('request');
 const moment = require('moment');
+const io = require('../server');
 const model = require('../models/index');
+
 
 // eslint-disable-next-line prefer-destructuring
 const Op = sequelize.Op;
@@ -438,11 +440,14 @@ exports.createRating = async (req, res) => {
                 time: Date(),
                 settingId: settings.id,
             })
-            .then(ratings => res.status(201).json({
-                error: false,
-                data: ratings,
-                message: 'New reaction have been added.',
-            }))
+            .then((ratings) => {
+                io.emit('newRating', ratings);
+                res.status(201).json({
+                    error: false,
+                    data: ratings,
+                    message: 'New reaction have been added.',
+                });
+            })
             .then(() => {
                 checkRatingsStatus(settings);
             })
