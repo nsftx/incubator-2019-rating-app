@@ -85,7 +85,7 @@ exports.userlogin = async (req, res) => {
         }));
     }
     verify().catch(error => res.json({
-        error: 'User not found or token expired',
-        data: error,
+        error: true,
+        data: 'User not found or token expired',
     }));
 };
