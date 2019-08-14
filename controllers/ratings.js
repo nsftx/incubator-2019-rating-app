@@ -125,7 +125,7 @@ exports.getAllRatings = async (req, res) => {
         .catch(error => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.getRatingsByHour = async (req, res) => {
@@ -171,7 +171,7 @@ exports.getRatingsByHour = async (req, res) => {
             .then(setting => setting)
             .catch(error => res.json({
                 error: true,
-                message: error,
+                message: 'Server error',
             })));
     }
 
@@ -441,6 +441,8 @@ exports.createRating = async (req, res) => {
                 settingId: settings.id,
             })
             .then((ratings) => {
+                const data = ratings.dataValues;
+                data.time = moment(ratings.dataValues.time).format('YYYY-MM-DD HH:mm:ss');
                 io.emit('newRating', ratings);
                 res.status(201).json({
                     error: false,
