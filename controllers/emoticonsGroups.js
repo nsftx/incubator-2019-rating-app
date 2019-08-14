@@ -106,12 +106,12 @@ exports.updateGroup = async (req, res) => {
         name,
     } = req.body;
 
-    const finder = await model.emoticonsGroups.findOne({
+    const groupExist = await model.emoticonsGroups.findOne({
         where: {
             id: req.params.id,
         },
     });
-    if (!finder) {
+    if (!groupExist) {
         return res.json({
             error: true,
             data: {},
