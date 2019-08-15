@@ -14,7 +14,7 @@ chai.use(chaiHttp);
 describe('/GET all emoticonsGroups', () => {
     it('it should GET all the emoticons', (done) => {
         chai.request(server)
-            .get('/emoticonsGroups')
+            .get('/api/v1/emoticonsGroups')
             .set('Authorization', '123')
             .end((err, res) => {
                 res.should.have.status(200);
@@ -38,7 +38,7 @@ describe('/GET/:id one emoticonsGroup', () => {
             raw: true,
         });
         chai.request(server)
-            .get(`/emoticonsGroups/${emoticonsGroups.id}`)
+            .get(`/api/v1/emoticonsGroups/${emoticonsGroups.id}`)
             .set('Authorization', '123')
             .end((err, res) => {
                 res.should.have.status(200);
@@ -54,19 +54,20 @@ describe('/GET/:id one emoticonsGroup', () => {
 
 describe('/POST one emoticonsGroup', () => {
     it('it should not POST an emoticonGroup without name', (done) => {
-        const emoticon = {};
+        const emoticon = {
+            name: '',
+        };
         chai.request(server)
-            .post('/emoticonsGroups')
+            .post('/api/v1/emoticonsGroups')
             .set('Authorization', '123')
             .send(emoticon)
             .end((err, res) => {
-                res.should.have.status(200);
+                res.should.have.status(400);
                 res.body.should.be.a('object');
                 res.body.should.have.property('error');
                 res.body.error.should.be.eql(true);
                 res.body.error.should.be.a('boolean');
                 res.body.should.have.property('message');
-                res.body.data.length.should.be.eql(0);
                 done();
             });
     });
@@ -75,7 +76,7 @@ describe('/POST one emoticonsGroup', () => {
             name: 'test',
         };
         chai.request(server)
-            .post('/emoticonsGroups')
+            .post('/api/v1/emoticonsGroups')
             .set('Authorization', '123')
             .send(emoticon)
             .end((err, res) => {
@@ -105,7 +106,7 @@ describe('/PUT one emoticonsGroup', () => {
         });
         emoticonsGroup.name = 'test 2';
         chai.request(server)
-            .put(`/emoticonsGroups/${emoticonsGroup.id}`)
+            .put(`/api/v1/emoticonsGroups/${emoticonsGroup.id}`)
             .set('Authorization', '123')
             .send(emoticonsGroup)
             .end((err, res) => {
@@ -119,21 +120,39 @@ describe('/PUT one emoticonsGroup', () => {
                 res.body.data[0].should.be.eql(1);
             });
     });
+
+    it('it should NOT UPDATE emoticonGroup if there is no such object in database', (done) => {
+        const emoticonsGroup = {
+            id: 3,
+        };
+        chai.request(server)
+            .put(`/api/v1/emoticonsGroups/${emoticonsGroup.id}`)
+            .set('Authorization', '123')
+            .send(emoticonsGroup)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                done();
+            });
+    });
 });
 
 describe('/DELETE one emoticonsGroup', () => {
     it('it should DELETE one emoticonGroup', async () => {
         const emoticonsGroup = await model.emoticonsGroups.findOne({
-            where: {
-                name: 'test 2',
-            },
+
             order: [
                 ['id', 'DESC'],
             ],
             raw: true,
         });
+        console.log(emoticonsGroup);
         chai.request(server)
-            .delete(`/emoticonsGroups/${emoticonsGroup.id}`)
+            .delete(`/api/v1/emoticonsGroups/${emoticonsGroup.id}`)
             .set('Authorization', '123')
             .send(emoticonsGroup)
             .end((err, res) => {
