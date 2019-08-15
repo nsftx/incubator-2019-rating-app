@@ -14,7 +14,7 @@ router.post('/many', auth, emoticonsGroupsController.createMany);
 // put
 router.put('/:id', auth, emoticonsGroupsController.updateGroup);
 // get one
-router.get('/:id', auth, emoticonsGroupsController.updateGroup);
+router.get('/:id', auth, emoticonsGroupsController.getOne);
 // delete
 router.delete('/:id', auth, emoticonsGroupsController.deleteGroup);
 

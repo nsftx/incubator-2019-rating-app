@@ -18,13 +18,30 @@ exports.getAllGroups = async (req, res) => {
             message: error,
         }));
 };
+exports.getOne = async (req, res) => {
+    const EmoticonsGroupsId = req.params.id;
+
+    model.settings.findOne({
+        where: {
+            id: EmoticonsGroupsId,
+        },
+    })
+        .then(emoticonsGroup => res.json({
+            error: false,
+            data: emoticonsGroup,
+        }))
+        .catch(error => res.json({
+            error: true,
+            message: error,
+        }));
+};
 exports.createGroup = async (req, res) => {
     const {
         name,
     } = req.body;
 
     if (!name) {
-        return res.json({
+        return res.status(400).json({
             error: true,
             data: {},
             message: 'Name not defined',
@@ -112,7 +129,7 @@ exports.updateGroup = async (req, res) => {
         },
     });
     if (!groupExist) {
-        return res.json({
+        return res.status(400).json({
             error: true,
             data: {},
             message: 'No emoticonsGroup with that Id',
