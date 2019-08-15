@@ -9,7 +9,8 @@ module.exports = {
       },
       email: {
         allowNull: false,
-        type: Sequelize.STRING(100),
+        type: Sequelize.STRING(128),
+        unique: true,
       },
       createdAt: {
         type: 'TIMESTAMP',

@@ -1,5 +1,8 @@
 module.exports = {
   up: (queryInterface) => {
-    queryInterface.addIndex('ratings', ['time', 'settings_id']);
+    return queryInterface.addIndex('ratings', ['settingId', 'time']);
+  },
+  down: (queryInterface) => {
+    return queryInterface.removeIndex('ratings', ['settingId', 'time']);
   },
 };

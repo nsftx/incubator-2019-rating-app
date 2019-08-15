@@ -58,7 +58,7 @@ exports.getAllSettings = async (req, res) => {
         .catch(error => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.getLastSettings = async (req, res) => {
