@@ -9,12 +9,12 @@ const con = mysql.createConnection({
 con.connect((err) => {
     if (err) throw err;
     console.log('Connected');
-    con.query('CREATE DATABASE ratings CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci', (error) => {
+    con.query(`CREATE DATABASE ${process.env.DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`, (error) => {
         if (error) throw error;
-        console.log('Database created: ratings');
+        console.log(`Database created: ${process.env.DB_NAME}`);
     });
-    con.query('CREATE DATABASE ratings_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci', (error) => {
+    con.query(`CREATE DATABASE ${process.env.DB_TEST_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`, (error) => {
         if (error) throw error;
-        console.log('Database created: ratings_test');
+        console.log(`Test database created: ${process.env.DB_TEST_NAME}`);
     });
 });
