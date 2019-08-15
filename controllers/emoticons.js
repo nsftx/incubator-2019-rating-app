@@ -20,28 +20,28 @@ exports.createEmoticon = async (req, res) => {
     } = req.body;
 
     if (!name) {
-        return res.json({
+        return res.status(400).json({
             error: true,
             data: {},
             message: 'Name not defined',
         });
     }
     if (!symbol) {
-        return res.json({
+        return res.status(400).json({
             error: true,
             data: {},
             message: 'Symbol not defined',
         });
     }
     if (!emoticonsGroupId) {
-        return res.json({
+        return res.status(400).json({
             error: true,
             data: {},
             message: 'emoticonsGroupId not defined',
         });
     }
     if (!value) {
-        return res.json({
+        return res.status(400).json({
             error: true,
             data: {},
             message: 'Value not defined',
@@ -83,7 +83,7 @@ exports.updateEmoticon = async (req, res) => {
         },
     });
     if (!emoticonExist) {
-        return res.json({
+        return res.status(400).json({
             error: true,
             data: {},
             message: 'No emoticons with that Id',
