@@ -52,7 +52,7 @@ const getEmoticonsForSettings = async (emoticonsGroupId, emoticonNumber) => {
     return filteredEmoticons;
 };
 const slackPush = (averageRating) => {
-    const hook = 'https://hooks.slack.com/services/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';
+    const hook = process.env.SLACK_HOOK;
     const avg = averageRating.toFixed(2);
     (async () => {
         try {

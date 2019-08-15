@@ -7,11 +7,13 @@
     "test": "mocha"
   },
   "dependencies": {
+    "ajv": "^6.10.2",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
+    "dotenv": "^8.0.0",
     "express": "~4.16.1",
     "google-auth-library": "^5.1.0",
     "googleapis": "^40.0.1",
