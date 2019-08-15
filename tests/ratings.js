@@ -68,8 +68,8 @@ describe('get emoticons', () => {
 
 // REQUEST takes too much time and is not used
 
-/* describe('/GET ratings', () => {
-    it('it should GET all the ratings', (done) => {
+describe('/GET ratings', () => {
+    it.skip('it should GET all the ratings', (done) => {
         chai.request(server)
             .get('/ratings')
             .set('Authorization', '123')
@@ -78,13 +78,13 @@ describe('get emoticons', () => {
                 res.body.should.be.a('object');
                 res.body.should.have.property('error');
                 res.body.should.have.property('data');
-                res.body.error.should.be.false;
+                res.body.error.should.be.eql(false);
                 res.body.data.should.be.a('array');
                 res.body.error.should.be.a('boolean');
                 done();
             });
     });
-}); */
+});
 
 describe('/POST ratings by hour', () => {
     it('should get ratings for one day based on interval recieved in body', (done) => {

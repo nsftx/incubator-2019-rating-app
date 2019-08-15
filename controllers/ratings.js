@@ -2,7 +2,9 @@
 const sequelize = require('sequelize');
 const request = require('request');
 const moment = require('moment');
+const io = require('../server');
 const model = require('../models/index');
+
 
 // eslint-disable-next-line prefer-destructuring
 const Op = sequelize.Op;
@@ -50,7 +52,7 @@ const getEmoticonsForSettings = async (emoticonsGroupId, emoticonNumber) => {
     return filteredEmoticons;
 };
 const slackPush = (averageRating) => {
-    const hook = 'https://hooks.slack.com/services/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';
+    const hook = process.env.SLACK_HOOK;
     const avg = averageRating.toFixed(2);
     (async () => {
         try {
@@ -123,7 +125,7 @@ exports.getAllRatings = async (req, res) => {
         .catch(error => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.getRatingsByHour = async (req, res) => {
@@ -169,7 +171,7 @@ exports.getRatingsByHour = async (req, res) => {
             .then(setting => setting)
             .catch(error => res.json({
                 error: true,
-                message: error,
+                message: 'Server error',
             })));
     }
 
@@ -438,11 +440,16 @@ exports.createRating = async (req, res) => {
                 time: Date(),
                 settingId: settings.id,
             })
-            .then(ratings => res.status(201).json({
-                error: false,
-                data: ratings,
-                message: 'New reaction have been added.',
-            }))
+            .then((ratings) => {
+                const data = ratings.dataValues;
+                data.time = moment(ratings.dataValues.time).format('YYYY-MM-DD HH:mm:ss');
+                io.emit('newRating', ratings);
+                res.status(201).json({
+                    error: false,
+                    data: ratings,
+                    message: 'New reaction have been added.',
+                });
+            })
             .then(() => {
                 checkRatingsStatus(settings);
             })

@@ -22,7 +22,7 @@ This command installs a package, and any packages that it depends on.
 
 ### Setting up database
 
-First step is to setup database settings which are in `config/config.json` file.
+First step is to setup database settings which are in `config/config.json` and `config/db.js` files.
 After setting up database settings run command.
 
 ```

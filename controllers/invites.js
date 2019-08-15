@@ -7,8 +7,8 @@ const emailIsValid = (email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'ratings.app3@gmail.com',
-        pass: 'Newsmay1!',
+        user: process.env.APP_EMAIL,
+        pass: process.env.APP_PASS,
     },
 });
 
@@ -52,7 +52,7 @@ exports.sendInvite = async (req, res) => {
                 }).then((newInvite) => {
                     // console.log('created new user: ', newUser);
                     const mailOptions = {
-                        from: 'ratings.app3@gmail.com',
+                        from: process.env.APP_EMAIL,
                         to: email,
                         subject: 'App invite test',
                         text: 'That was easy!',
@@ -71,7 +71,7 @@ exports.sendInvite = async (req, res) => {
                 }).catch(error => res.json({
                     error: true,
                     data: [],
-                    message: error,
+                    message: 'Server error, invite not created!',
                 }));
             }
         });

@@ -5,7 +5,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER.UNSIGNED,
       },
       text: {
         allowNull: false,
@@ -14,7 +14,7 @@ module.exports = {
       },
       language: {
         allowNull: false,
-        type: Sequelize.STRING(30),
+        type: Sequelize.STRING(16),
         defaultValue: 'en',
       },
       createdAt: {
