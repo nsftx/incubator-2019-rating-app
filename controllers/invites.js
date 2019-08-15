@@ -17,6 +17,14 @@ exports.sendInvite = async (req, res) => {
         email,
     } = req.body;
 
+    if (!email) {
+        return res.status(400).json({
+            error: true,
+            data: {},
+            message: 'Email not defined',
+        });
+    }
+
     if (!emailIsValid(email)) {
         return res.status(400).json({
             error: true,
@@ -26,10 +34,10 @@ exports.sendInvite = async (req, res) => {
     }
 
     model.invites.findOne({
-            where: {
-                email,
-            },
-        })
+        where: {
+            email,
+        },
+    })
         .then(async (existingInvite) => {
             if (existingInvite) {
                 // console.log('user is: ', currentUser);
