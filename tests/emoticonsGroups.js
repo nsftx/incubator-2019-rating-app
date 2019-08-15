@@ -120,25 +120,6 @@ describe('/PUT one emoticonsGroup', () => {
                 res.body.data[0].should.be.eql(1);
             });
     });
-
-    it('it should NOT UPDATE emoticonGroup if there is no such object in database', (done) => {
-        const emoticonsGroup = {
-            id: 3,
-        };
-        chai.request(server)
-            .put(`/api/v1/emoticonsGroups/${emoticonsGroup.id}`)
-            .set('Authorization', '123')
-            .send(emoticonsGroup)
-            .end((err, res) => {
-                res.should.have.status(400);
-                res.body.should.be.a('object');
-                res.body.should.have.property('error');
-                res.body.error.should.be.eql(true);
-                res.body.error.should.be.a('boolean');
-                res.body.should.have.property('message');
-                done();
-            });
-    });
 });
 
 describe('/DELETE one emoticonsGroup', () => {
@@ -150,7 +131,6 @@ describe('/DELETE one emoticonsGroup', () => {
             ],
             raw: true,
         });
-        console.log(emoticonsGroup);
         chai.request(server)
             .delete(`/api/v1/emoticonsGroups/${emoticonsGroup.id}`)
             .set('Authorization', '123')
