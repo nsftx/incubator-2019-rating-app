@@ -3,7 +3,7 @@ const {
     OAuth2Client,
 } = require('google-auth-library');
 
-const client = new OAuth2Client('641180167952-h84f394tnm50qm8j30t101cla1k2aglh.apps.googleusercontent.com');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const model = require('../models/index');
 
@@ -24,7 +24,7 @@ exports.userlogin = async (req, res) => {
     async function verify() {
         const ticket = await client.verifyIdToken({
             idToken: token,
-            audience: '641180167952-h84f394tnm50qm8j30t101cla1k2aglh.apps.googleusercontent.com', // Specify the CLIENT_ID of the app that accesses the backend
+            audience: process.env.GOOGLE_CLIENT_ID,
             // Or, if multiple clients access the backend:
             // [CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
         });
@@ -85,7 +85,7 @@ exports.userlogin = async (req, res) => {
         }));
     }
     verify().catch(error => res.json({
-        error: 'User not found or token expired',
-        data: error,
+        error: true,
+        data: 'User not found or token expired',
     }));
 };
