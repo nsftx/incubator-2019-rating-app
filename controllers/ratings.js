@@ -117,11 +117,11 @@ const checkRatingsStatus = async (settings) => {
 
 exports.getAllRatings = async (req, res) => {
     model.ratings.findAll({
-            include: [model.settings],
-        }).then(ratings => res.json({
-            error: false,
-            data: ratings,
-        }))
+        include: [model.settings],
+    }).then(ratings => res.json({
+        error: false,
+        data: ratings,
+    }))
         .catch(error => res.json({
             error: true,
             data: [],
@@ -151,23 +151,23 @@ exports.getRatingsByHour = async (req, res) => {
         }
 
         promises.push(model.ratings.findAll({
-                where: {
-                    settingId: settings.id,
-                    time: {
-                        [Op.gte]: new Date(`${date}T${j}:00:00.000Z`),
-                        [Op.lt]: new Date(`${date}T${z}:00:00.000Z`),
-                    },
+            where: {
+                settingId: settings.id,
+                time: {
+                    [Op.gte]: new Date(`${date}T${j}:00:00.000Z`),
+                    [Op.lt]: new Date(`${date}T${z}:00:00.000Z`),
                 },
-                attributes: [
-                    /* [sequelize.fn('time', new Date(`${date}T${j}:00:00.000Z`)), 'start'],
-                    [sequelize.fn('time', new Date(`${date}T${z}:00:00.000Z`)), 'end'], */
-                    'emoticonId',
-                    [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
+            },
+            attributes: [
+                /* [sequelize.fn('time', new Date(`${date}T${j}:00:00.000Z`)), 'start'],
+                [sequelize.fn('time', new Date(`${date}T${z}:00:00.000Z`)), 'end'], */
+                'emoticonId',
+                [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
 
-                ],
-                group: ['emoticonId'],
-                raw: true,
-            })
+            ],
+            group: ['emoticonId'],
+            raw: true,
+        })
             .then(setting => setting)
             .catch(error => res.json({
                 error: true,
@@ -235,20 +235,20 @@ exports.getRatingsByDays = async (req, res) => {
         }
         const date = `${start.getFullYear()}-${month}-${day}`;
         promises.push(model.ratings.findAll({
-                where: {
-                    settingId: settings.id,
-                    time: {
-                        [Op.startsWith]: date,
-                    },
+            where: {
+                settingId: settings.id,
+                time: {
+                    [Op.startsWith]: date,
                 },
-                attributes: [
-                    'emoticonId',
-                    [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
-                ],
-                group: ['emoticonId'],
+            },
+            attributes: [
+                'emoticonId',
+                [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
+            ],
+            group: ['emoticonId'],
 
-                raw: true,
-            })
+            raw: true,
+        })
             .then(ratings => ratings)
             .catch(error => res.json({
                 error: true,
@@ -304,20 +304,20 @@ exports.getCountOfRatings = async (req, res) => {
 
 
     model.ratings.findAll({
-            where: {
-                settingId: settings.id,
-                time: {
-                    [Op.gte]: new Date(`${startDate}T00:00:00.000Z`),
-                    [Op.lte]: new Date(`${endDate}T23:59:59.999Z`),
-                },
+        where: {
+            settingId: settings.id,
+            time: {
+                [Op.gte]: new Date(`${startDate}T00:00:00.000Z`),
+                [Op.lte]: new Date(`${endDate}T23:59:59.999Z`),
             },
-            attributes: [
-                'emoticonId',
-                [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
-            ],
-            group: ['emoticonId'],
-            raw: true,
-        })
+        },
+        attributes: [
+            'emoticonId',
+            [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
+        ],
+        group: ['emoticonId'],
+        raw: true,
+    })
         .then((ratings) => {
             const newEmoticons = [];
             for (let i = 0; i < emoticons.length; i += 1) {
@@ -349,20 +349,20 @@ exports.getCountOfRatingsDay = async (req, res) => {
     const settings = await getCurrentSettings();
 
     model.ratings.findAll({
-            where: {
-                settingId: settings.id,
-                time: {
-                    [Op.startsWith]: date,
-                },
+        where: {
+            settingId: settings.id,
+            time: {
+                [Op.startsWith]: date,
             },
-            attributes: [
-                'emoticonId',
-                [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
+        },
+        attributes: [
+            'emoticonId',
+            [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
 
-            ],
-            group: ['emoticonId'],
-            raw: true,
-        })
+        ],
+        group: ['emoticonId'],
+        raw: true,
+    })
         .then(async (ratings) => {
             const emoticons = await getEmoticons(settings.emoticonsGroupId);
             const newEmoticons = [];
@@ -390,10 +390,10 @@ exports.getOneRating = async (req, res) => {
     const ratingId = req.params.id;
 
     model.ratings.findOne({
-            where: {
-                id: ratingId,
-            },
-        })
+        where: {
+            id: ratingId,
+        },
+    })
         .then(rating => res.json({
             error: false,
             data: rating,
@@ -414,10 +414,10 @@ exports.createManyRatings = async (req, res) => {
 
     ratingsArray.forEach((rating) => {
         promises.push(model.ratings.create({
-                emoticonId: rating.emoticonId,
-                time: Date(),
-                settingId: settings.id,
-            }).then(ratings => ratings)
+            emoticonId: rating.emoticonId,
+            time: Date(),
+            settingId: settings.id,
+        }).then(ratings => ratings)
             .catch(error => res.json({
                 error: true,
                 message: error,
@@ -437,6 +437,13 @@ exports.createRating = async (req, res) => {
     const {
         emoticonId,
     } = req.body;
+    if (!emoticonId) {
+        return res.status(400).json({
+            error: true,
+            data: {},
+            message: 'emoticonId not defined',
+        });
+    }
 
     const emoticon = await model.emoticons.findOne({
         where: {
@@ -454,10 +461,10 @@ exports.createRating = async (req, res) => {
         });
     } else {
         model.ratings.create({
-                emoticonId: emoticon.id,
-                time: Date(),
-                settingId: settings.id,
-            })
+            emoticonId: emoticon.id,
+            time: Date(),
+            settingId: settings.id,
+        })
             .then((ratings) => {
                 const data = ratings.dataValues;
                 data.time = moment(ratings.dataValues.time).format('YYYY-MM-DD HH:mm:ss');
@@ -485,8 +492,8 @@ exports.updateRating = async (req, res) => {
     } = req.body;
 
     model.ratings.update({
-            emoticonId: emoticon,
-        }, {
+        emoticonId: emoticon,
+    }, {
             where: {
                 id: ratingId,
             },
@@ -505,10 +512,10 @@ exports.deleteRating = async (req, res) => {
     const ratingId = req.params.id;
 
     model.ratings.destroy({
-            where: {
-                id: ratingId,
-            },
-        })
+        where: {
+            id: ratingId,
+        },
+    })
         .then(rating => res.json({
             error: false,
             message: 'Rating has been deleted.',
