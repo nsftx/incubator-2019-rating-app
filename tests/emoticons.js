@@ -14,7 +14,7 @@ chai.use(chaiHttp);
 describe('/GET emoticons', () => {
     it('it should GET all the emoticons', (done) => {
         chai.request(server)
-            .get('/emoticons')
+            .get('/api/v1/emoticons')
             .set('Authorization', '123')
             .end((err, res) => {
                 res.should.have.status(200);
@@ -43,7 +43,7 @@ describe('/GET/:id one emoticon', () => {
          */
 
         chai.request(server)
-            .get(`/emoticons/${emoticon.id}`)
+            .get(`/api/v1/emoticons/${emoticon.id}`)
             .set('Authorization', '123')
             .end((err, res) => {
                 res.should.have.status(200);
@@ -65,25 +65,21 @@ describe('/POST one emoticon', () => {
             value: 1,
         };
         chai.request(server)
-            .post('/emoticons')
+            .post('/api/v1/emoticons')
             .set('Authorization', '123')
             .send(emoticon)
             .end((err, res) => {
-                res.should.have.status(200);
+                res.should.have.status(400);
                 res.body.should.be.a('object');
                 res.body.should.have.property('error');
                 res.body.error.should.be.eql(true);
                 res.body.error.should.be.a('boolean');
                 res.body.should.have.property('message');
-                res.body.data.length.should.be.eql(0);
                 done();
             });
     });
     it('it should POST one emoticon', async () => {
         const emoticonsGroup = await model.emoticonsGroups.findOne({
-            where: {
-                name: 'test',
-            },
             raw: true,
         });
         const emoticon = {
@@ -94,7 +90,7 @@ describe('/POST one emoticon', () => {
         };
 
         chai.request(server)
-            .post('/emoticons')
+            .post('/api/v1/emoticons')
             .set('Authorization', '123')
             .send(emoticon)
             .end((err, res) => {
@@ -119,14 +115,11 @@ describe('/POST one emoticon', () => {
 describe('/PUT one emoticon', () => {
     it('it should UPDATE one emoticon', async () => {
         const emoticon = await model.emoticons.findOne({
-            where: {
-                name: 'test',
-            },
             raw: true,
         });
         emoticon.value = 2;
         chai.request(server)
-            .put(`/emoticons/${emoticon.id}`)
+            .put(`/api/v1/emoticons/${emoticon.id}`)
             .set('Authorization', '123')
             .send(emoticon)
             .end((err, res) => {
@@ -145,13 +138,10 @@ describe('/PUT one emoticon', () => {
 describe('/DELETE one emoticon', () => {
     it('it should DELETE one emoticon', async () => {
         const emoticon = await model.emoticons.findOne({
-            where: {
-                name: 'test',
-            },
             raw: true,
         });
         chai.request(server)
-            .delete(`/emoticons/${emoticon.id}`)
+            .delete(`/api/v1/emoticons/${emoticon.id}`)
             .set('Authorization', '123')
             .send(emoticon)
             .end((err, res) => {
