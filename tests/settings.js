@@ -165,6 +165,24 @@ describe('/POST one message', () => {
                 done();
             });
     });
+    it('it should not POST an emoticonGroup without name', (done) => {
+        const emoticonNumber = {
+            emoticonNumber: null,
+        };
+        chai.request(server)
+            .post('/api/v1/settings')
+            .set('Authorization', '123')
+            .send(emoticonNumber)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                done();
+            });
+    });
 
     it('it should POST one setting', (done) => {
         const settings = {
@@ -197,7 +215,7 @@ describe('/POST one message', () => {
     });
 });
 
-describe('/POST one message', () => {
+describe('/PUT one message', () => {
     it('it should UPDATE one setting', async () => {
         const settings = await model.settings.findOne({
             order: [
@@ -219,6 +237,96 @@ describe('/POST one message', () => {
                 res.body.error.should.be.a('boolean');
                 res.body.should.have.property('message')
                     .eql('Settings have been created.');
+            });
+    });
+    it('it should not POST settings without emoticonNumber', (done) => {
+        const emoticon = {
+            emoticonNumber: null,
+        };
+        chai.request(server)
+            .post('/api/v1/emoticonsGroups')
+            .set('Authorization', '123')
+            .send(emoticon)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                done();
+            });
+    });
+    it('it should not POST settings without messageId', (done) => {
+        const emoticon = {
+            messageId: null,
+        };
+        chai.request(server)
+            .post('/api/v1/emoticonsGroups')
+            .set('Authorization', '123')
+            .send(emoticon)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                done();
+            });
+    });
+    it('it should not POST settings without messageTimeout', (done) => {
+        const emoticon = {
+            messageTimeout: null,
+        };
+        chai.request(server)
+            .post('/api/v1/emoticonsGroups')
+            .set('Authorization', '123')
+            .send(emoticon)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                done();
+            });
+    });
+    it('it should not POST settings without emoticonsGroupId', (done) => {
+        const emoticon = {
+            emoticonsGroupId: null,
+        };
+        chai.request(server)
+            .post('/api/v1/emoticonsGroups')
+            .set('Authorization', '123')
+            .send(emoticon)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                done();.
+            });
+    });
+    it('it should not POST settings without userId', (done) => {
+        const emoticon = {
+            userId: null,
+        };
+        chai.request(server)
+            .post('/api/v1/emoticonsGroups')
+            .set('Authorization', '123')
+            .send(emoticon)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                done();
             });
     });
 });
