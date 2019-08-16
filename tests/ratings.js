@@ -113,9 +113,12 @@ describe('/POST ratings by hour', () => {
 });
 describe('/POST ratings by days', () => {
     it('Should get ratings for more days based on interval recieved in body', (done) => {
+        const startDate = moment().subtract(10, "days").format('YYYY-MM-DD');
+        const endDate = moment().format('YYYY-MM-DD');
+
         const body = {
-            startDate: '2019-08-01',
-            endDate: '2019-08-10',
+            startDate,
+            endDate,
         };
         const start = moment(body.startDate);
         const end = moment(body.endDate);
@@ -144,9 +147,12 @@ describe('/POST ratings by days', () => {
 
 describe('/POST ratings count for more days', () => {
     it('Should get count of ratings for more days based on interval recieved in body', (done) => {
+        const startDate = moment().subtract(10, 'days').format('YYYY-MM-DD');
+        const endDate = moment().format('YYYY-MM-DD');
+
         const body = {
-            startDate: '2019-08-01',
-            endDate: '2019-08-10',
+            startDate,
+            endDate,
         };
         chai.request(server)
             .post('/api/v1/ratings/report')
@@ -158,12 +164,10 @@ describe('/POST ratings count for more days', () => {
                 res.body.should.have.property('error');
                 res.body.should.have.property('data');
                 res.body.error.should.be.eql(false);
-                res.body.data.should.be.a('array');
                 res.body.error.should.be.a('boolean');
-                res.body.emoticons.length.should.be.lte(5);
-                res.body.emoticons.length.should.be.gte(3);
-                res.body.emoticons.should.be.a('array');
-                res.body.data.length.should.be.lte(res.body.emoticons.length);
+                res.body.data.should.be.a('array');
+                res.body.data.length.should.be.lte(5);
+                res.body.data.length.should.be.gte(3);
                 done();
             });
     });
@@ -229,6 +233,24 @@ describe('/POST ratings', () => {
                 res.body.data.should.have.property('updatedAt');
                 res.body.should.have.property('message')
                     .eql('New reaction have been added.');
+            });
+    });
+    it('it should not POST an new rating without emoticonsId', (done) => {
+        const rating = {
+            emoticonId: null
+        };
+        chai.request(server)
+            .post('/api/v1/ratings')
+            .set('Authorization', '123')
+            .send(rating)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                done();
             });
     });
 });
