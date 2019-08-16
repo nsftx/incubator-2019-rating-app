@@ -15,17 +15,14 @@ chai.use(chaiHttp);
 describe('/POST new invite', () => {
     it('it should not POST if invite already exist', async () => {
         const invite = await model.invites.findOne({
-            where: {
-                email: 'nsoft@nsoft.com',
-            },
             raw: true,
         });
         chai.request(server)
-            .post('/invites')
+            .post('/api/v1/invites')
             .set('Authorization', '123')
             .send(invite)
             .end((err, res) => {
-                res.should.have.status(200);
+                res.should.have.status(400);
                 res.body.should.be.a('object');
                 res.body.should.have.property('error');
                 res.body.error.should.be.eql(true);
@@ -52,7 +49,7 @@ describe('/POST new invite', () => {
             email,
         };
         chai.request(server)
-            .post('/invites')
+            .post('/api/v1/invites')
             .set('Authorization', '123')
             .send(invite)
             .end((err, res) => {
@@ -65,6 +62,24 @@ describe('/POST new invite', () => {
                 res.body.data.should.have.property('email');
                 res.body.data.should.have.property('createdAt');
                 res.body.data.should.have.property('updatedAt');
+            });
+    });
+    it('it should not POST if there is no email', (done) => {
+        const invite = {
+            email: '',
+        };
+        chai.request(server)
+            .post('/api/v1/invites')
+            .set('Authorization', '123')
+            .send(invite)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                done();
             });
     });
 });

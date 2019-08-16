@@ -15,7 +15,7 @@ chai.use(chaiHttp);
 describe('/GET messages', () => {
     it('it should GET all the messages', (done) => {
         chai.request(server)
-            .get('/messages')
+            .get('/api/v1/messages')
             .set('Authorization', '123')
             .end((err, res) => {
                 res.should.have.status(200);
@@ -40,7 +40,7 @@ describe('/GET/:id one emoticon', () => {
         });
 
         chai.request(server)
-            .get(`/messages/${message.id}`)
+            .get(`/api/v1/messages/${message.id}`)
             .set('Authorization', '123')
             .end((err, res) => {
                 res.should.have.status(200);
@@ -63,7 +63,7 @@ describe('/POST one message', () => {
             language: 'en',
         };
         chai.request(server)
-            .post('/messages')
+            .post('/api/v1/messages')
             .set('Authorization', '123')
             .send(message)
             .end((err, res) => {
@@ -78,14 +78,13 @@ describe('/POST one message', () => {
             });
     });
     it('it should POST one message', (done) => {
-
         const message = {
             text: 'Test message!',
             language: 'en',
-        }
+        };
 
         chai.request(server)
-            .post('/messages')
+            .post('/api/v1/messages')
             .set('Authorization', '123')
             .send(message)
             .end((err, res) => {
@@ -103,6 +102,44 @@ describe('/POST one message', () => {
                 done();
             });
     });
+    it('it should not POST message without text', (done) => {
+        const message = {
+            text: '',
+            language: 'en',
+        };
+        chai.request(server)
+            .post('/api/v1/messages')
+            .set('Authorization', '123')
+            .send(message)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                done();
+            });
+    });
+    it('it should not POST message without language', (done) => {
+        const message = {
+            text: 'Dummy text',
+            language: '',
+        };
+        chai.request(server)
+            .post('/api/v1/messages')
+            .set('Authorization', '123')
+            .send(message)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('error');
+                res.body.error.should.be.eql(true);
+                res.body.error.should.be.a('boolean');
+                res.body.should.have.property('message');
+                done();
+            });
+    });
 });
 
 describe('/PUT one message', () => {
@@ -116,9 +153,9 @@ describe('/PUT one message', () => {
         const text = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500 s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.';
 
         message.text = text;
-        message.language = "ba";
+        message.language = 'ba';
         chai.request(server)
-            .put(`/messages/${message.id}`)
+            .put(`/api/v1/messages/${message.id}`)
             .set('Authorization', '123')
             .send(message)
             .end((err, res) => {
@@ -142,7 +179,7 @@ describe('/PUT one message', () => {
         message.text = 'Testni text';
         message.language = 'ba';
         chai.request(server)
-            .put(`/messages/${message.id}`)
+            .put(`/api/v1/messages/${message.id}`)
             .set('Authorization', '123')
             .send(message)
             .end((err, res) => {
@@ -168,7 +205,7 @@ describe('/DELETE one message', () => {
         });
 
         chai.request(server)
-            .delete(`/messages/${message.id}`)
+            .delete(`/api/v1/messages/${message.id}`)
             .set('Authorization', '123')
             .end((err, res) => {
                 res.should.have.status(200);
