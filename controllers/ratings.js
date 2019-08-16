@@ -311,21 +311,29 @@ exports.getCountOfRatings = async (req, res) => {
                     [Op.lte]: new Date(`${endDate}T23:59:59.999Z`),
                 },
             },
-            include: [{
-                model: model.emoticons,
-                attributes: ['id', 'name', 'symbol', 'value'],
-            }],
             attributes: [
                 'emoticonId',
                 [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
             ],
             group: ['emoticonId'],
+            raw: true,
         })
-        .then(count => res.json({
-            error: false,
-            data: count,
-            emoticons,
-        }))
+        .then((ratings) => {
+            const newEmoticons = [];
+            for (let i = 0; i < emoticons.length; i += 1) {
+                emoticons[i].count = 0;
+                for (let j = 0; j < ratings.length; j += 1) {
+                    if (emoticons[i].id === ratings[j].emoticonId) {
+                        emoticons[i].count = ratings[j].count;
+                    }
+                }
+                newEmoticons.push(emoticons[i]);
+            }
+            return res.json({
+                error: false,
+                data: newEmoticons,
+            });
+        })
         .catch(error => res.json({
             error: true,
             data: [],
@@ -353,15 +361,25 @@ exports.getCountOfRatingsDay = async (req, res) => {
 
             ],
             group: ['emoticonId'],
-            include: [{
-                model: model.emoticons,
-                attributes: ['id', 'name', 'symbol', 'value'],
-            }],
+            raw: true,
         })
-        .then(count => res.json({
-            error: false,
-            data: count,
-        }))
+        .then(async (ratings) => {
+            const emoticons = await getEmoticons(settings.emoticonsGroupId);
+            const newEmoticons = [];
+            for (let i = 0; i < emoticons.length; i += 1) {
+                emoticons[i].count = 0;
+                for (let j = 0; j < ratings.length; j += 1) {
+                    if (emoticons[i].id === ratings[j].emoticonId) {
+                        emoticons[i].count = ratings[j].count;
+                    }
+                }
+                newEmoticons.push(emoticons[i]);
+            }
+            return res.json({
+                error: false,
+                data: newEmoticons,
+            });
+        })
         .catch(error => res.json({
             error: true,
             data: [],
