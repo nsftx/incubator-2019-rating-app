@@ -33,22 +33,23 @@ const getMessage = async (messageId) => {
     });
     return message;
 };
+
 exports.getAllSettings = async (req, res) => {
     model.settings.findAll({
-        include: [{
-            model: model.messages,
-            as: 'message',
-            attributes: ['id', 'text', 'language'],
-        },
-        {
-            model: model.emoticonsGroups,
-            attributes: ['id', 'name'],
-        }, {
-            model: model.users,
-            attributes: ['id', 'firstName', 'lastName'],
-        },
-        ],
-    })
+            include: [{
+                    model: model.messages,
+                    as: 'message',
+                    attributes: ['id', 'text', 'language'],
+                },
+                {
+                    model: model.emoticonsGroups,
+                    attributes: ['id', 'name'],
+                }, {
+                    model: model.users,
+                    attributes: ['id', 'firstName', 'lastName'],
+                },
+            ],
+        })
         .then(
             settings => res.json({
                 error: false,
@@ -63,21 +64,21 @@ exports.getAllSettings = async (req, res) => {
 };
 exports.getLastSettings = async (req, res) => {
     model.settings.findOne({
-        order: [
-            ['createdAt', 'DESC'],
-        ],
-        include: [{
-            model: model.messages,
-            as: 'message',
-            attributes: ['id', 'text', 'language'],
-        },
-        {
-            model: model.emoticonsGroups,
-            as: 'emoticonsGroup',
-            attributes: ['name'],
-        },
-        ],
-    })
+            order: [
+                ['createdAt', 'DESC'],
+            ],
+            include: [{
+                    model: model.messages,
+                    as: 'message',
+                    attributes: ['id', 'text', 'language'],
+                },
+                {
+                    model: model.emoticonsGroups,
+                    as: 'emoticonsGroup',
+                    attributes: ['name'],
+                },
+            ],
+        })
         .then(async (settings) => {
             // eslint-disable-next-line max-len
             const filteredEmoticons = await getEmoticonsForSettings(settings.emoticonsGroupId, settings.emoticonNumber);
@@ -97,22 +98,22 @@ exports.getOneSettings = async (req, res) => {
     const settingsId = req.params.id;
 
     model.settings.findOne({
-        where: {
-            id: settingsId,
-        },
-        include: [{
-            model: model.messages,
-            as: 'message',
-            attributes: ['id', 'text', 'language'],
-        },
-        {
-            model: model.emoticonsGroups,
-            attributes: ['id', 'name'],
-        }, {
-            model: model.users,
-        },
-        ],
-    })
+            where: {
+                id: settingsId,
+            },
+            include: [{
+                    model: model.messages,
+                    as: 'message',
+                    attributes: ['id', 'text', 'language'],
+                },
+                {
+                    model: model.emoticonsGroups,
+                    attributes: ['id', 'name'],
+                }, {
+                    model: model.users,
+                },
+            ],
+        })
         .then(async (settings) => {
             const emoticons = await model.emoticons.findAll({
                 where: {
@@ -152,9 +153,7 @@ exports.createSettings = async (req, res) => {
         emoticonsGroupId,
         userId,
     } = req.body;
-    const objekt = {};
-    objekt.error = false;
-    objekt.data = req.body;
+
     if (typeof (emoticonNumber) !== 'undefined') {
         if (emoticonNumber < 3 || emoticonNumber > 5) {
             res.status(400).json({
@@ -174,18 +173,21 @@ exports.createSettings = async (req, res) => {
             return;
         }
     }
+    const socketData = {};
+    socketData.error = false;
+    socketData.data = req.body;
 
     model.settings.create({
-        emoticonNumber,
-        messageId,
-        messageTimeout,
-        emoticonsGroupId,
-        userId,
-    })
+            emoticonNumber,
+            messageId,
+            messageTimeout,
+            emoticonsGroupId,
+            userId,
+        })
         .then(async (settings) => {
-            objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
+            socketData.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
             // Send live info to client
-            io.emit('newSettings', objekt);
+            io.emit('newSettings', socketData);
 
             return res.json({
                 error: false,
@@ -226,13 +228,6 @@ exports.updateSettings = async (req, res) => {
         return res.status(400).json({
             error: true,
             data: {},
-            emoticonsGroupId: 'emoticonsGroupId not defined',
-        });
-    }
-    if (!emoticonsGroupId) {
-        return res.status(400).json({
-            error: true,
-            data: {},
             message: 'emoticonsGroupId not defined',
         });
     }
@@ -243,10 +238,6 @@ exports.updateSettings = async (req, res) => {
             message: 'userId not defined',
         });
     }
-
-    const objekt = {};
-    objekt.error = false;
-    objekt.data = req.body;
 
 
     if (emoticonNumber && !(Number.isNaN(emoticonNumber))) {
@@ -272,15 +263,20 @@ exports.updateSettings = async (req, res) => {
         }
     }
 
+    const socketData = {};
+    socketData.error = false;
+    socketData.data = req.body;
+
+
     // if emoticonNumber not changed
     const old = await model.settings.findOne({
-        where: {
-            id: settingsId,
-            emoticonNumber,
-            emoticonsGroupId,
-        },
-        raw: true,
-    })
+            where: {
+                id: settingsId,
+                emoticonNumber,
+                emoticonsGroupId,
+            },
+            raw: true,
+        })
         .then(setting => setting)
         .catch(error => res.json({
             error: true,
@@ -290,21 +286,21 @@ exports.updateSettings = async (req, res) => {
     // if emoticonNumber not changed => update, else => create new
     if (old !== null) {
         model.settings.update({
-            emoticonNumber,
-            messageId,
-            messageTimeout,
-            emoticonsGroupId,
-            userId,
-        }, {
+                emoticonNumber,
+                messageId,
+                messageTimeout,
+                emoticonsGroupId,
+                userId,
+            }, {
                 where: {
                     id: settingsId,
                 },
             })
             .then(async (settings) => {
-                objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
-                objekt.data.message = await getMessage(messageId);
+                socketData.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
+                socketData.data.message = await getMessage(messageId);
                 // Send live info to client
-                io.emit('newSettings', objekt);
+                io.emit('newSettings', socketData);
 
                 res.json({
                     error: false,
@@ -318,18 +314,18 @@ exports.updateSettings = async (req, res) => {
             }));
     } else {
         model.settings.create({
-            emoticonNumber,
-            messageId,
-            messageTimeout,
-            emoticonsGroupId,
-            userId,
-        })
+                emoticonNumber,
+                messageId,
+                messageTimeout,
+                emoticonsGroupId,
+                userId,
+            })
             .then(async (settings) => {
-                objekt.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
-                objekt.data.message = await getMessage(messageId);
+                socketData.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
+                socketData.data.message = await getMessage(messageId);
 
                 // Send live info to client
-                io.emit('newSettings', objekt);
+                io.emit('newSettings', socketData);
 
                 res.status(201).json({
                     error: false,
@@ -347,10 +343,10 @@ exports.deleteSettings = async (req, res) => {
     const settings = req.params.id;
 
     model.settings.destroy({
-        where: {
-            id: settings,
-        },
-    })
+            where: {
+                id: settings,
+            },
+        })
         .then(resStatus => res.json({
             error: false,
             status: resStatus,
@@ -368,13 +364,13 @@ exports.testRouteSettings = async (req, res) => {
     } = req.body;
 
     model.settings.findAll({
-        where: {
-            emoticonsGroupId,
-            emoticonNumber,
-        },
-        attributes: ['id', 'emoticonNumber', 'messageId', 'emoticonsGroupId', 'messageTimeout', 'userId'],
-        raw: true,
-    })
+            where: {
+                emoticonsGroupId,
+                emoticonNumber,
+            },
+            attributes: ['id', 'emoticonNumber', 'messageId', 'emoticonsGroupId', 'messageTimeout', 'userId'],
+            raw: true,
+        })
         .then(async (settings) => {
             res.json({
                 error: false,
