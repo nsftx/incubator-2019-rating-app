@@ -2,9 +2,9 @@ const model = require('../models/index');
 
 exports.getAllEmoticons = async (req, res) => {
     model.emoticons.findAll().then(emoticons => res.json({
-        error: false,
-        data: emoticons,
-    }))
+            error: false,
+            data: emoticons,
+        }))
         .catch(error => res.json({
             error: true,
             data: [],
@@ -47,12 +47,29 @@ exports.createEmoticon = async (req, res) => {
             message: 'Value not defined',
         });
     }
+
+    await model.emoticons.findAll({
+        where: {
+            emoticonsGroupId,
+        },
+        raw: true,
+    }).then((emoticons) => {
+        if (emoticons && emoticons.length >= 5) {
+            return res.json({
+                error: true,
+                message: 'Emoticons group already has 5 emoticons!',
+            });
+        }
+        return emoticons;
+    });
+
+
     model.emoticons.create({
-        name,
-        symbol,
-        emoticonsGroupId,
-        value,
-    })
+            name,
+            symbol,
+            emoticonsGroupId,
+            value,
+        })
         .then(emoticons => res.status(201).json({
             error: false,
             data: emoticons,
@@ -90,11 +107,11 @@ exports.updateEmoticon = async (req, res) => {
         });
     }
     model.emoticons.update({
-        name,
-        symbol,
-        emoticonsGroupId,
-        value,
-    }, {
+            name,
+            symbol,
+            emoticonsGroupId,
+            value,
+        }, {
             where: {
                 id,
             },
@@ -114,15 +131,15 @@ exports.getOneEmoticon = async (req, res) => {
     const EmoticonsId = req.params.id;
 
     model.settings.findOne({
-        where: {
-            id: EmoticonsId,
-        },
-        include: [{
-            model: model.emoticonsGroups,
+            where: {
+                id: EmoticonsId,
+            },
+            include: [{
+                model: model.emoticonsGroups,
 
 
-        }],
-    })
+            }],
+        })
         .then(emoticons => res.json({
             error: false,
             data: emoticons,
@@ -136,10 +153,10 @@ exports.deleteEmoticon = async (req, res) => {
     const EmoticonsId = req.params.id;
 
     model.emoticons.destroy({
-        where: {
-            id: EmoticonsId,
-        },
-    })
+            where: {
+                id: EmoticonsId,
+            },
+        })
         .then(status => res.json({
             error: false,
             data: status,
