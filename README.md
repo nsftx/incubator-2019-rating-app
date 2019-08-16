@@ -30,7 +30,7 @@ After setting up `.env` file open console and run:
 node config/db.js
 ```
 
-This command creates 2 databases. One is used in development environment and other is used for unit testing.
+This command creates 2 databases. One is used in development environment and other is used for testing enviroment.
 
 When databases have been created, next step is to run migrations to add tables to databases. Run following two commands to run migrations:
 
