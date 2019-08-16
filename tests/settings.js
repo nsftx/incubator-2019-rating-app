@@ -308,7 +308,7 @@ describe('/PUT one message', () => {
                 res.body.error.should.be.eql(true);
                 res.body.error.should.be.a('boolean');
                 res.body.should.have.property('message');
-                done();.
+                done();
             });
     });
     it('it should not POST settings without userId', (done) => {
