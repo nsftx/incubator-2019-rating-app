@@ -88,10 +88,10 @@ exports.getLastSettings = async (req, res) => {
                 emoticons: filteredEmoticons,
             });
         })
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.getOneSettings = async (req, res) => {
@@ -140,9 +140,9 @@ exports.getOneSettings = async (req, res) => {
                 emoticons: filteredEmoticons,
             });
         })
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.createSettings = async (req, res) => {
@@ -195,9 +195,9 @@ exports.createSettings = async (req, res) => {
                 message: 'Settings have ben updated.',
             });
         })
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.updateSettings = async (req, res) => {
@@ -278,9 +278,9 @@ exports.updateSettings = async (req, res) => {
             raw: true,
         })
         .then(setting => setting)
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 
     // if emoticonNumber not changed => update, else => create new
@@ -297,7 +297,8 @@ exports.updateSettings = async (req, res) => {
                 },
             })
             .then(async (settings) => {
-                socketData.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
+                socketData.emoticons = await getEmoticonsForSettings(emoticonsGroupId,
+                    emoticonNumber);
                 socketData.data.message = await getMessage(messageId);
                 // Send live info to client
                 io.emit('newSettings', socketData);
@@ -308,9 +309,9 @@ exports.updateSettings = async (req, res) => {
                     message: 'Settings have been updated.',
                 });
             })
-            .catch(error => res.json({
+            .catch(() => res.json({
                 error: true,
-                message: error,
+                message: 'Server error',
             }));
     } else {
         model.settings.create({
@@ -321,7 +322,8 @@ exports.updateSettings = async (req, res) => {
                 userId,
             })
             .then(async (settings) => {
-                socketData.emoticons = await getEmoticonsForSettings(emoticonsGroupId, emoticonNumber);
+                socketData.emoticons = await getEmoticonsForSettings(emoticonsGroupId,
+                    emoticonNumber);
                 socketData.data.message = await getMessage(messageId);
 
                 // Send live info to client
@@ -333,9 +335,9 @@ exports.updateSettings = async (req, res) => {
                     message: 'Settings have been created.',
                 });
             })
-            .catch(error => res.json({
+            .catch(() => res.json({
                 error: true,
-                message: error,
+                message: 'Server error',
             }));
     }
 };
@@ -352,9 +354,9 @@ exports.deleteSettings = async (req, res) => {
             status: resStatus,
             message: 'Settings have been deleted.',
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.testRouteSettings = async (req, res) => {
@@ -377,9 +379,9 @@ exports.testRouteSettings = async (req, res) => {
                 data: settings,
             });
         })
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };

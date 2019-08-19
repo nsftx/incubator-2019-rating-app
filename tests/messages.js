@@ -121,25 +121,6 @@ describe('/POST one message', () => {
                 done();
             });
     });
-    it('it should not POST message without language', (done) => {
-        const message = {
-            text: 'Dummy text',
-            language: '',
-        };
-        chai.request(server)
-            .post('/api/v1/messages')
-            .set('Authorization', '123')
-            .send(message)
-            .end((err, res) => {
-                res.should.have.status(400);
-                res.body.should.be.a('object');
-                res.body.should.have.property('error');
-                res.body.error.should.be.eql(true);
-                res.body.error.should.be.a('boolean');
-                res.body.should.have.property('message');
-                done();
-            });
-    });
 });
 
 describe('/PUT one message', () => {

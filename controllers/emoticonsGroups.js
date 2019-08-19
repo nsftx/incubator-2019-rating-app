@@ -12,10 +12,10 @@ exports.getAllGroups = async (req, res) => {
             error: false,
             data: emoticonsGroups,
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.getOne = async (req, res) => {
@@ -30,9 +30,9 @@ exports.getOne = async (req, res) => {
             error: false,
             data: emoticonsGroup,
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.createGroup = async (req, res) => {
@@ -55,10 +55,10 @@ exports.createGroup = async (req, res) => {
             data: emoticonsGroups,
             message: 'New emoticon group has been created.',
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.createMany = async (req, res) => {
@@ -112,9 +112,9 @@ exports.createMany = async (req, res) => {
                     message: 'Emoticons have been created',
                 });
             });
-        }).catch(error => res.json({
+        }).catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.updateGroup = async (req, res) => {
@@ -148,9 +148,9 @@ exports.updateGroup = async (req, res) => {
             data: emoticonsGroups,
             message: 'Emoticons group has been updated.',
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.deleteGroup = async (req, res) => {
@@ -166,8 +166,8 @@ exports.deleteGroup = async (req, res) => {
             data: status,
             message: 'Emoticons group has been deleted.',
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };

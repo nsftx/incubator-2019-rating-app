@@ -5,10 +5,10 @@ exports.getAllEmoticons = async (req, res) => {
             error: false,
             data: emoticons,
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.createEmoticon = async (req, res) => {
@@ -75,10 +75,10 @@ exports.createEmoticon = async (req, res) => {
             data: emoticons,
             message: 'New emoticon has been created.',
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.updateEmoticon = async (req, res) => {
@@ -121,9 +121,9 @@ exports.updateEmoticon = async (req, res) => {
             data: emoticons,
             message: 'Emoticon has been updated.',
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 
@@ -144,9 +144,9 @@ exports.getOneEmoticon = async (req, res) => {
             error: false,
             data: emoticons,
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.deleteEmoticon = async (req, res) => {
@@ -162,8 +162,8 @@ exports.deleteEmoticon = async (req, res) => {
             data: status,
             message: 'Emoticon has been deleted.',
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
