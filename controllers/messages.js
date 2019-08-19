@@ -25,14 +25,6 @@ exports.createMessage = async (req, res) => {
             message: 'Text not defined',
         });
     }
-    if (!language) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'Language not defined',
-        });
-    }
-
 
     if (text.length < 3 || text.length > 120) {
         res.status(400).json({
@@ -41,9 +33,9 @@ exports.createMessage = async (req, res) => {
         });
     } else {
         model.messages.create({
-            text,
-            language,
-        })
+                text,
+                language,
+            })
             .then(messages => res.status(201).json({
                 error: false,
                 data: messages,
@@ -71,17 +63,17 @@ exports.createMessageForSettings = async (req, res) => {
         });
     }
     model.messages.create({
-        text,
-        language,
-    })
+            text,
+            language,
+        })
         .then((messages) => {
             model.settings.update({
                 messageId: messages.dataValues.id,
             }, {
-                    where: {
-                        id: settingId,
-                    },
-                });
+                where: {
+                    id: settingId,
+                },
+            });
         })
         .then(messages => res.json({
             error: false,
@@ -108,9 +100,9 @@ exports.updateMessage = async (req, res) => {
         });
     }
     model.messages.update({
-        text,
-        language,
-    }, {
+            text,
+            language,
+        }, {
             where: {
                 id: messageId,
             },
@@ -130,10 +122,10 @@ exports.getMessageByLanguage = async (req, res) => {
     const lang = req.params;
 
     model.messages.findAll({
-        where: {
-            language: lang,
-        },
-    })
+            where: {
+                language: lang,
+            },
+        })
         .then(message => res.json({
             error: false,
             data: message,
@@ -147,10 +139,10 @@ exports.getOneMessage = async (req, res) => {
     const messageId = req.params.id;
 
     model.messages.findOne({
-        where: {
-            id: messageId,
-        },
-    })
+            where: {
+                id: messageId,
+            },
+        })
         .then(message => res.json({
             error: false,
             data: message,
@@ -164,10 +156,10 @@ exports.deleteMessage = async (req, res) => {
     const messageId = req.params.id;
 
     model.messages.destroy({
-        where: {
-            id: messageId,
-        },
-    })
+            where: {
+                id: messageId,
+            },
+        })
         .then(message => res.json({
             error: false,
             data: message,
