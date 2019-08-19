@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const model = require('../models/index');
+require('dotenv').config('/.env');
 
 
 const emailIsValid = (email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
