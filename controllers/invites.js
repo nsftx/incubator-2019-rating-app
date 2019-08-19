@@ -33,10 +33,10 @@ exports.sendInvite = async (req, res) => {
     }
 
     model.invites.findOne({
-        where: {
-            email,
-        },
-    })
+            where: {
+                email,
+            },
+        })
         .then(async (existingInvite) => {
             if (existingInvite) {
                 // console.log('user is: ', currentUser);
@@ -63,7 +63,7 @@ exports.sendInvite = async (req, res) => {
                             console.log(`Email sent: ${info.response}`);
                         }
                     });
-                    res.json({
+                    return res.json({
                         error: false,
                         data: newInvite,
                     });
