@@ -201,7 +201,7 @@ exports.getRatingsByHour = async (req, res) => {
             dataArray[i].ratings = result[i];
         }
 
-        res.json({
+        return res.json({
             error: false,
             data: dataArray,
             emoticons,
