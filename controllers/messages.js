@@ -6,10 +6,10 @@ exports.getAllMessages = async (req, res) => {
             error: false,
             data: messages,
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.createMessage = async (req, res) => {
@@ -41,9 +41,9 @@ exports.createMessage = async (req, res) => {
                 data: messages,
                 message: 'New message has been created.',
             }))
-            .catch(error => res.json({
+            .catch(() => res.json({
                 error: true,
-                message: error,
+                message: 'Server error',
             }));
     }
 };
@@ -80,9 +80,9 @@ exports.createMessageForSettings = async (req, res) => {
             data: messages,
             message: 'Message has been created!',
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
     return 1;
 };
@@ -112,9 +112,9 @@ exports.updateMessage = async (req, res) => {
             data: messages,
             message: 'Message has been updated!',
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
     return 1;
 };
@@ -130,9 +130,9 @@ exports.getMessageByLanguage = async (req, res) => {
             error: false,
             data: message,
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.getOneMessage = async (req, res) => {
@@ -147,9 +147,9 @@ exports.getOneMessage = async (req, res) => {
             error: false,
             data: message,
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.deleteMessage = async (req, res) => {
@@ -165,8 +165,8 @@ exports.deleteMessage = async (req, res) => {
             data: message,
             message: 'Message has been deleted.',
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };

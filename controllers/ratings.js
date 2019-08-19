@@ -122,7 +122,7 @@ exports.getAllRatings = async (req, res) => {
             error: false,
             data: ratings,
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
             data: [],
             message: 'Server error',
@@ -169,7 +169,7 @@ exports.getRatingsByHour = async (req, res) => {
                 raw: true,
             })
             .then(setting => setting)
-            .catch(error => res.json({
+            .catch(() => res.json({
                 error: true,
                 message: 'Server error',
             })));
@@ -250,9 +250,9 @@ exports.getRatingsByDays = async (req, res) => {
                 raw: true,
             })
             .then(ratings => ratings)
-            .catch(error => res.json({
+            .catch(() => res.json({
                 error: true,
-                message: error,
+                message: 'Server error',
             })));
 
 
@@ -334,10 +334,10 @@ exports.getCountOfRatings = async (req, res) => {
                 data: newEmoticons,
             });
         })
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.getCountOfRatingsDay = async (req, res) => {
@@ -380,10 +380,10 @@ exports.getCountOfRatingsDay = async (req, res) => {
                 data: newEmoticons,
             });
         })
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
             data: [],
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.getOneRating = async (req, res) => {
@@ -398,9 +398,9 @@ exports.getOneRating = async (req, res) => {
             error: false,
             data: rating,
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.createManyRatings = async (req, res) => {
@@ -418,9 +418,9 @@ exports.createManyRatings = async (req, res) => {
                 time: Date(),
                 settingId: settings.id,
             }).then(ratings => ratings)
-            .catch(error => res.json({
+            .catch(() => res.json({
                 error: true,
-                message: error,
+                message: 'Server error',
             })));
     });
 
@@ -472,15 +472,15 @@ exports.createRating = async (req, res) => {
                 res.status(201).json({
                     error: false,
                     data: ratings,
-                    message: 'New reaction have been added.',
+                    message: 'New reaction has been added.',
                 });
             })
             .then(() => {
                 checkRatingsStatus(settings);
             })
-            .catch(error => res.json({
+            .catch(() => res.json({
                 error: true,
-                message: error,
+                message: 'Server error',
             }));
     }
 };
@@ -503,9 +503,9 @@ exports.updateRating = async (req, res) => {
             message: 'Rating has been updated.',
             data: rating,
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };
 exports.deleteRating = async (req, res) => {
@@ -521,8 +521,8 @@ exports.deleteRating = async (req, res) => {
             message: 'Rating has been deleted.',
             data: rating,
         }))
-        .catch(error => res.json({
+        .catch(() => res.json({
             error: true,
-            message: error,
+            message: 'Server error',
         }));
 };

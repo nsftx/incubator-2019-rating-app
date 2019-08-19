@@ -13,9 +13,7 @@ const transporter = nodemailer.createTransport({
 });
 
 exports.sendInvite = async (req, res) => {
-    const {
-        email,
-    } = req.body;
+    const email = req.body.email;
 
     if (!email) {
         return res.status(400).json({
@@ -68,7 +66,7 @@ exports.sendInvite = async (req, res) => {
                         error: false,
                         data: newInvite,
                     });
-                }).catch(error => res.json({
+                }).catch(() => res.json({
                     error: true,
                     data: [],
                     message: 'Server error, invite not created!',
