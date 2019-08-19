@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const model = require('../models/index');
 
 exports.getAllEmoticons = async (req, res) => {
@@ -82,7 +83,6 @@ exports.createEmoticon = async (req, res) => {
         }));
 };
 exports.updateEmoticon = async (req, res) => {
-
     const {
         id,
     } = req.params;
@@ -136,8 +136,6 @@ exports.getOneEmoticon = async (req, res) => {
             },
             include: [{
                 model: model.emoticonsGroups,
-
-
             }],
         })
         .then(emoticons => res.json({
