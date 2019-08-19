@@ -115,7 +115,7 @@ describe('/POST ratings by hour', () => {
 });
 describe('/POST ratings by days', () => {
     it('Should get ratings for more days based on interval recieved in body', (done) => {
-        const startDate = moment().subtract(10, "days").format('YYYY-MM-DD');
+        const startDate = moment().subtract(10, 'days').format('YYYY-MM-DD');
         const endDate = moment().format('YYYY-MM-DD');
 
         const body = {
@@ -234,7 +234,7 @@ describe('/POST ratings', () => {
     });
     it('it should not POST an new rating without emoticonId', (done) => {
         const rating = {
-            emoticonId: null
+            emoticonId: null,
         };
         chai.request(server)
             .post('/api/v1/ratings')
