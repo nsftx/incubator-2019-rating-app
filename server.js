@@ -1,7 +1,7 @@
-const http = require('http');
+const https = require('https');
 require('dotenv').config('/.env');
 
-const srv = http.createServer();
+const srv = https.createServer();
 const io = require('socket.io')(srv);
 
 io.listen(process.env.SOCKET_PORT);
