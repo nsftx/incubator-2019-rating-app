@@ -1,4 +1,4 @@
-const socket = require('socket.io-client')('https://localhost:7000', {secure:true});
+const socket = require('socket.io-client')('http://localhost:7000');
 
 socket.on('newSettings', (data) => {
     console.log(data);
