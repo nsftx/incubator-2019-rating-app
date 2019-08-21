@@ -11,6 +11,16 @@ const should = chai.should();
 
 chai.use(chaiHttp);
 
+const getMessage = async () => {
+    const message = await model.messages.findOne({
+        order: [
+            ['id', 'DESC'],
+        ],
+        raw: true,
+    });
+    return message;
+};
+
 
 describe('/GET messages', () => {
     it('it should GET all the messages', (done) => {
@@ -32,12 +42,7 @@ describe('/GET messages', () => {
 
 describe('/GET/:id one emoticon', () => {
     it('it should GET one emoticon by the given id', async () => {
-        const message = await model.messages.findOne({
-            order: [
-                ['id', 'ASC'],
-            ],
-            raw: true,
-        });
+        const message = await getMessage();
 
         chai.request(server)
             .get(`/api/v1/messages/${message.id}`)
@@ -121,35 +126,11 @@ describe('/POST one message', () => {
                 done();
             });
     });
-    it('it should not POST message without language', (done) => {
-        const message = {
-            text: 'Dummy text',
-            language: '',
-        };
-        chai.request(server)
-            .post('/api/v1/messages')
-            .set('Authorization', '123')
-            .send(message)
-            .end((err, res) => {
-                res.should.have.status(400);
-                res.body.should.be.a('object');
-                res.body.should.have.property('error');
-                res.body.error.should.be.eql(true);
-                res.body.error.should.be.a('boolean');
-                res.body.should.have.property('message');
-                done();
-            });
-    });
 });
 
 describe('/PUT one message', () => {
     it('it should not UPDATE message where text is longer than 120 characters', async () => {
-        const message = await model.messages.findOne({
-            order: [
-                ['id', 'ASC'],
-            ],
-            raw: true,
-        });
+        const message = await getMessage();
         const text = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500 s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.';
 
         message.text = text;
@@ -170,12 +151,7 @@ describe('/PUT one message', () => {
     });
 
     it('it should UPDATE one message', async () => {
-        const message = await model.messages.findOne({
-            order: [
-                ['id', 'ASC'],
-            ],
-            raw: true,
-        });
+        const message = await getMessage();
         message.text = 'Testni text';
         message.language = 'ba';
         chai.request(server)
@@ -197,12 +173,7 @@ describe('/PUT one message', () => {
 
 describe('/DELETE one message', () => {
     it('it should DELETE one message', async () => {
-        const message = await model.messages.findOne({
-            order: [
-                ['id', 'DESC'],
-            ],
-            raw: true,
-        });
+        const message = await getMessage();
 
         chai.request(server)
             .delete(`/api/v1/messages/${message.id}`)

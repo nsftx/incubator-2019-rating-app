@@ -1,5 +1,8 @@
 const nodemailer = require('nodemailer');
 const model = require('../models/index');
+require('dotenv').config('/.env');
+
+const response = require('../helpers/responses');
 
 
 const emailIsValid = (email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
@@ -8,44 +11,41 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.APP_EMAIL,
-        pass: process.env.APP_PASS,
+        pass: process.env.EMAIL_PASS,
     },
 });
 
+const classic = (error, data, message = '') => {
+    const res = {
+        error,
+        data,
+        message,
+    };
+    return res;
+};
+
 exports.sendInvite = async (req, res) => {
-    const {
-        email,
-    } = req.body;
+    const email = req.body;
 
     if (!email) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'Email not defined',
-        });
+        return res.status(400).json(response.classic(true, {}, 'Email not defined'));
     }
 
     if (!emailIsValid(email)) {
-        return res.status(400).json({
-            error: true,
-            message: 'Invalid email',
-            data: email,
-        });
+        return res.status(400).json(response.classic(true, email, 'Invalid email'));
     }
 
     model.invites.findOne({
-        where: {
-            email,
-        },
-    })
+            where: {
+                email,
+            },
+        })
         .then(async (existingInvite) => {
             if (existingInvite) {
                 // console.log('user is: ', currentUser);
-                res.status(400).json({
-                    error: true,
-                    message: 'Invitation already exists!',
-                    data: existingInvite,
-                });
+                res.status(400).json(
+                    response.classic(true, existingInvite, 'Invitation already exists!'),
+                );
             } else {
                 await model.invites.create({
                     email,
@@ -64,15 +64,10 @@ exports.sendInvite = async (req, res) => {
                             console.log(`Email sent: ${info.response}`);
                         }
                     });
-                    res.json({
-                        error: false,
-                        data: newInvite,
-                    });
-                }).catch(error => res.json({
-                    error: true,
-                    data: [],
-                    message: 'Server error, invite not created!',
-                }));
+                    return res.json(response.classic(false, newInvite));
+                }).catch(() => res.json(
+                    response.classic(true, [], 'Server error'),
+                ));
             }
         });
     return 1;

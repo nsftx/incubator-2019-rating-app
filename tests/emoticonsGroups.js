@@ -11,6 +11,18 @@ const should = chai.should();
 
 chai.use(chaiHttp);
 
+
+const getEmoticonsGroup = async () => {
+    const group = await model.emoticonsGroups.findOne({
+            order: [
+                ['id', 'DESC'],
+            ],
+            raw: true,
+        });
+    return group;
+};
+
+
 describe('/GET all emoticonsGroups', () => {
     it('it should GET all the emoticons', (done) => {
         chai.request(server)
@@ -31,12 +43,7 @@ describe('/GET all emoticonsGroups', () => {
 
 describe('/GET/:id one emoticonsGroup', () => {
     it('it should GET one emoticonGroup by the given id', async () => {
-        const emoticonsGroups = await model.emoticonsGroups.findOne({
-            order: [
-                ['id', 'ASC'],
-            ],
-            raw: true,
-        });
+        const emoticonsGroups = await getEmoticonsGroup();
         chai.request(server)
             .get(`/api/v1/emoticonsGroups/${emoticonsGroups.id}`)
             .set('Authorization', '123')
@@ -46,8 +53,8 @@ describe('/GET/:id one emoticonsGroup', () => {
                 res.body.should.have.property('error');
                 res.body.should.have.property('data');
                 res.body.error.should.be.eql(false);
-                res.body.data.should.be.a('object');
                 res.body.error.should.be.a('boolean');
+                res.body.data.should.be.a('object');
             });
     });
 });
@@ -98,12 +105,7 @@ describe('/POST one emoticonsGroup', () => {
 
 describe('/PUT one emoticonsGroup', () => {
     it('it should UPDATE one emoticonGroup', async () => {
-        const emoticonsGroup = await model.emoticonsGroups.findOne({
-            where: {
-                name: 'test',
-            },
-            raw: true,
-        });
+        const emoticonsGroup = await getEmoticonsGroup();
         emoticonsGroup.name = 'test 2';
         chai.request(server)
             .put(`/api/v1/emoticonsGroups/${emoticonsGroup.id}`)
@@ -124,13 +126,7 @@ describe('/PUT one emoticonsGroup', () => {
 
 describe('/DELETE one emoticonsGroup', () => {
     it('it should DELETE one emoticonGroup', async () => {
-        const emoticonsGroup = await model.emoticonsGroups.findOne({
-
-            order: [
-                ['id', 'DESC'],
-            ],
-            raw: true,
-        });
+        const emoticonsGroup = await getEmoticonsGroup();
         chai.request(server)
             .delete(`/api/v1/emoticonsGroups/${emoticonsGroup.id}`)
             .set('Authorization', '123')

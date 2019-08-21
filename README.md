@@ -22,21 +22,22 @@ This command installs a package, and any packages that it depends on.
 
 ### Setting up database
 
-First step is to setup database settings which are in `config/config.json` and `config/db.js` files.
-After setting up database settings run command.
+First step is to create `.env` file and configure settings using `.env.example` as guide.
+
+After setting up `.env` file open console and run:
 
 ```
 node config/db.js
 ```
 
-This command creates 2 databases. One is used in development environment and other is used for unit testing.
+This command creates 2 databases. One is used in development environment and other is used for testing environment.
 
-When databases have been created, next step is to run migrations to add tables to databases. Run following two commands to run migrations.
+When databases have been created, next step is to run migrations to add tables to databases. Run following two commands to run migrations:
 
     sequelize db:migrate
     sequelize db:migrate --env test
 
-If you need to populate your database with some data run following commands.
+If you need to populate your database with some data run following commands:
 
     sequelize db:seed:all
     sequelize db:seed:all --env test

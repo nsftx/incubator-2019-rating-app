@@ -84,8 +84,104 @@ exports.userlogin = async (req, res) => {
             message: 'Finding user error!',
         }));
     }
-    verify().catch(error => res.status(401).json({
+    verify().catch(() => res.status(401).json({
         error: true,
         data: 'User not found or token expired',
     }));
+};
+
+exports.getUserByEmail = async (req, res) => {
+    const {
+        email,
+    } = req.body;
+
+    await model.users.findOne({
+            where: {
+                email,
+            },
+        })
+        .then((user) => {
+            if (user) {
+                res.json({
+                    error: false,
+                    data: user,
+                    message: '',
+                });
+            } else {
+                res.status(400).json({
+                    error: true,
+                    data: {},
+                    message: 'User not found',
+                });
+            }
+        })
+        .catch(() => res.json({
+            error: true,
+            data: {},
+            message: 'Server error, user not found!',
+        }));
+};
+exports.getUser = async (req, res) => {
+    const {
+        id,
+    } = req.params;
+
+    await model.users.findOne({
+            where: {
+                id,
+            },
+        })
+        .then((user) => {
+            if (user) {
+                res.json({
+                    error: false,
+                    data: user,
+                    message: '',
+                });
+            } else {
+                res.status(400).json({
+                    error: true,
+                    data: {},
+                    message: 'User not found',
+                });
+            }
+        })
+        .catch(() => res.json({
+            error: true,
+            data: {},
+            message: 'Server error, user not found!',
+        }));
+};
+
+exports.deleteUser = (req, res) => {
+    const {
+        email,
+    } = req.body;
+    console.log(email);
+
+    model.users.destroy({
+            where: {
+                email,
+            },
+        })
+        .then((user) => {
+            if (user) {
+                res.json({
+                    error: false,
+                    data: user,
+                    message: 'User deleted',
+                });
+            } else {
+                res.status(400).json({
+                    error: true,
+                    data: {},
+                    message: 'User not found',
+                });
+            }
+        })
+        .catch(error => res.json({
+            error: true,
+            data: {},
+            message: error,
+        }));
 };

@@ -43,7 +43,7 @@ describe('get emoticons for settings', () => {
 });
 
 describe('get message for settings', () => {
-    it('Should return message object with all keys', async () => {
+    it('Should return message object with required keys', async () => {
         const settings = await getSettings();
         const data = await getMessage(settings.messageId);
         assert.isObject(data);
@@ -89,14 +89,7 @@ describe('/GET/:id last setting', () => {
 
 describe('/GET/:id one setting', () => {
     it('it should GET one settings', async () => {
-        const settings = await model.settings.findOne({
-            order: [
-                ['id', 'ASC'],
-            ],
-            raw: true,
-        });
-
-
+        const settings = await getSettings();
         chai.request(server)
             .get(`/api/v1/settings/${settings.id}`)
             .set('Authorization', '123')
@@ -112,119 +105,14 @@ describe('/GET/:id one setting', () => {
             });
     });
 });
-describe('/POST one message', () => {
-    it('it should not POST an settings with emoticon number greater then 5 and lower than 3', (done) => {
-        const emoticonNumber = 2;
-
-        const settings = {
-            emoticonNumber,
-            messageId: 1,
-            messageTimeout: 10,
-            emoticonsGroupId: 27,
-            userId: 12,
-        };
-        chai.request(server)
-            .post('/api/v1/settings')
-            .set('Authorization', '123')
-            .send(settings)
-            .end((err, res) => {
-                res.should.have.status(400);
-                res.body.should.be.a('object');
-                res.body.should.have.property('error');
-                res.body.error.should.be.eql(true);
-                res.body.error.should.be.a('boolean');
-                res.body.should.have.property('message')
-                    .eql('Number of emoticons not in specified range!');
-                done();
-            });
-    });
-
-    it('it should not POST one setting with a messagetimeout greater then 10 and lower then 0', (done) => {
-        const messageTimeout = 11;
-
-        const settings = {
-            emoticonNumber: 4,
-            messageId: 1,
-            messageTimeout,
-            emoticonsGroupId: 27,
-            userId: 12,
-        };
-
-        chai.request(server)
-            .post('/api/v1/settings')
-            .set('Authorization', '123')
-            .send(settings)
-            .end((err, res) => {
-                res.should.have.status(400);
-                res.body.should.be.a('object');
-                res.body.should.have.property('error');
-                res.body.error.should.be.eql(true);
-                res.body.error.should.be.a('boolean');
-                res.body.should.have.property('message')
-                    .eql('Message timeout should be in range 0-10 sec!');
-                done();
-            });
-    });
-    it('it should not POST an emoticonGroup without name', (done) => {
-        const emoticonNumber = {
-            emoticonNumber: null,
-        };
-        chai.request(server)
-            .post('/api/v1/settings')
-            .set('Authorization', '123')
-            .send(emoticonNumber)
-            .end((err, res) => {
-                res.should.have.status(400);
-                res.body.should.be.a('object');
-                res.body.should.have.property('error');
-                res.body.error.should.be.eql(true);
-                res.body.error.should.be.a('boolean');
-                res.body.should.have.property('message');
-                done();
-            });
-    });
-
-    it('it should POST one setting', (done) => {
-        const settings = {
-            emoticonNumber: 5,
-            messageId: 4,
-            messageTimeout: 4,
-            emoticonsGroupId: 27,
-            userId: 12,
-        };
-
-        chai.request(server)
-            .post('/api/v1/settings')
-            .set('Authorization', '123')
-            .send(settings)
-            .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.a('object');
-                res.body.should.have.property('error');
-                res.body.error.should.be.eql(false);
-                res.body.error.should.be.a('boolean');
-                res.body.should.have.property('message')
-                    .eql('Settings have ben updated.');
-                res.body.data.should.have.property('emoticonNumber');
-                res.body.data.should.have.property('messageId');
-                res.body.data.should.have.property('messageTimeout');
-                res.body.data.should.have.property('emoticonsGroupId');
-                res.body.data.should.have.property('userId');
-                done();
-            });
-    });
-});
-
-describe('/PUT one message', () => {
+describe('/PUT one settings', () => {
     it('it should UPDATE one setting', async () => {
-        const settings = await model.settings.findOne({
-            order: [
-                ['id', 'ASC'],
-            ],
-            raw: true,
-        });
-        settings.messageTimeout = 5;
-        settings.emoticonNumber = 3;
+        const settings = await getSettings();
+        if (settings.emoticonNumber === 5) {
+            settings.emoticonNumber -= 1;
+        } else {
+            settings.emoticonNumber += 1;
+        }
         chai.request(server)
             .put(`/api/v1/settings/${settings.id}`)
             .set('Authorization', '123')
@@ -239,14 +127,13 @@ describe('/PUT one message', () => {
                     .eql('Settings have been created.');
             });
     });
-    it('it should not POST settings without emoticonNumber', (done) => {
-        const emoticon = {
-            emoticonNumber: null,
-        };
+    it('it should not UPDATE settings without emoticonNumber', async () => {
+        const settings = await getSettings();
+        settings.emoticonNumber = undefined;
         chai.request(server)
-            .post('/api/v1/emoticonsGroups')
+            .put(`/api/v1/settings/${settings.id}`)
             .set('Authorization', '123')
-            .send(emoticon)
+            .send(settings)
             .end((err, res) => {
                 res.should.have.status(400);
                 res.body.should.be.a('object');
@@ -254,17 +141,15 @@ describe('/PUT one message', () => {
                 res.body.error.should.be.eql(true);
                 res.body.error.should.be.a('boolean');
                 res.body.should.have.property('message');
-                done();
             });
     });
-    it('it should not POST settings without messageId', (done) => {
-        const emoticon = {
-            messageId: null,
-        };
+    it('it should not UPDATE settings without messageId', async () => {
+        const settings = await getSettings();
+        settings.messageId = undefined;
         chai.request(server)
-            .post('/api/v1/emoticonsGroups')
+            .put(`/api/v1/settings/${settings.id}`)
             .set('Authorization', '123')
-            .send(emoticon)
+            .send(settings)
             .end((err, res) => {
                 res.should.have.status(400);
                 res.body.should.be.a('object');
@@ -272,17 +157,15 @@ describe('/PUT one message', () => {
                 res.body.error.should.be.eql(true);
                 res.body.error.should.be.a('boolean');
                 res.body.should.have.property('message');
-                done();
             });
     });
-    it('it should not POST settings without messageTimeout', (done) => {
-        const emoticon = {
-            messageTimeout: null,
-        };
+    it('it should not UPDATE settings without emoticonsGroupId', async () => {
+        const settings = await getSettings();
+        settings.emoticonsGroupId = undefined;
         chai.request(server)
-            .post('/api/v1/emoticonsGroups')
+            .put(`/api/v1/settings/${settings.id}`)
             .set('Authorization', '123')
-            .send(emoticon)
+            .send(settings)
             .end((err, res) => {
                 res.should.have.status(400);
                 res.body.should.be.a('object');
@@ -290,17 +173,15 @@ describe('/PUT one message', () => {
                 res.body.error.should.be.eql(true);
                 res.body.error.should.be.a('boolean');
                 res.body.should.have.property('message');
-                done();
             });
     });
-    it('it should not POST settings without emoticonsGroupId', (done) => {
-        const emoticon = {
-            emoticonsGroupId: null,
-        };
+    it('it should not UPDATE settings without userId', async () => {
+        const settings = await getSettings();
+        settings.userId = undefined;
         chai.request(server)
-            .post('/api/v1/emoticonsGroups')
+            .put(`/api/v1/settings/${settings.id}`)
             .set('Authorization', '123')
-            .send(emoticon)
+            .send(settings)
             .end((err, res) => {
                 res.should.have.status(400);
                 res.body.should.be.a('object');
@@ -308,30 +189,10 @@ describe('/PUT one message', () => {
                 res.body.error.should.be.eql(true);
                 res.body.error.should.be.a('boolean');
                 res.body.should.have.property('message');
-                done();
-            });
-    });
-    it('it should not POST settings without userId', (done) => {
-        const emoticon = {
-            userId: null,
-        };
-        chai.request(server)
-            .post('/api/v1/emoticonsGroups')
-            .set('Authorization', '123')
-            .send(emoticon)
-            .end((err, res) => {
-                res.should.have.status(400);
-                res.body.should.be.a('object');
-                res.body.should.have.property('error');
-                res.body.error.should.be.eql(true);
-                res.body.error.should.be.a('boolean');
-                res.body.should.have.property('message');
-                done();
             });
     });
 });
-
-describe('/DELETE one setting', () => {
+/* describe('/DELETE one setting', () => {
     it('it should DELETE one setting', async () => {
         const settings = await model.settings.findOne({
             order: [
@@ -353,4 +214,4 @@ describe('/DELETE one setting', () => {
                     .eql('Settings have been deleted.');
             });
     });
-});
+}); */

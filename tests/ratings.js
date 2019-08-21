@@ -103,28 +103,29 @@ describe('/POST ratings by hour', () => {
                 res.body.should.have.property('error');
                 res.body.should.have.property('data');
                 res.body.error.should.be.eql(false);
-                res.body.data.should.be.a('array');
                 res.body.error.should.be.a('boolean');
+                res.body.data.should.be.a('array');
                 res.body.data.length.should.be.eql(dataLength);
                 res.body.emoticons.should.be.a('array');
+                res.body.emoticons.length.should.be.gte(3);
+                res.body.emoticons.length.should.be.lte(5);
                 done();
             });
     });
 });
 describe('/POST ratings by days', () => {
     it('Should get ratings for more days based on interval recieved in body', (done) => {
-        const startDate = moment().subtract(10, "days").format('YYYY-MM-DD');
+        const startDate = moment().subtract(10, 'days').format('YYYY-MM-DD');
         const endDate = moment().format('YYYY-MM-DD');
 
         const body = {
             startDate,
             endDate,
         };
-        const start = moment(body.startDate);
-        const end = moment(body.endDate);
+        const start = moment(startDate);
+        const end = moment(endDate);
 
         const dataLength = end.diff(start, 'days') + 1;
-        console.log('length:', dataLength);
         chai.request(server)
             .post('/api/v1/ratings/days')
             .set('Authorization', '123')
@@ -134,12 +135,13 @@ describe('/POST ratings by days', () => {
                 res.body.should.be.a('object');
                 res.body.should.have.property('error');
                 res.body.should.have.property('data');
+                res.body.error.should.be.a('boolean');
                 res.body.error.should.be.eql(false);
                 res.body.data.should.be.a('array');
-                res.body.error.should.be.a('boolean');
                 res.body.data.length.should.be.eql(dataLength);
                 res.body.emoticons.should.be.a('array');
-                res.body.emoticons.should.be.a('array');
+                res.body.emoticons.length.should.be.gte(3);
+                res.body.emoticons.length.should.be.lte(5);
                 done();
             });
     });
@@ -163,8 +165,8 @@ describe('/POST ratings count for more days', () => {
                 res.body.should.be.a('object');
                 res.body.should.have.property('error');
                 res.body.should.have.property('data');
-                res.body.error.should.be.eql(false);
                 res.body.error.should.be.a('boolean');
+                res.body.error.should.be.eql(false);
                 res.body.data.should.be.a('array');
                 res.body.data.length.should.be.lte(5);
                 res.body.data.length.should.be.gte(3);
@@ -176,7 +178,7 @@ describe('/POST ratings count for more days', () => {
 describe('/POST ratings count one day', () => {
     it('Should get count of ratings for more days based on interval recieved in body', (done) => {
         const body = {
-            date: '2019-08-06',
+            date: moment().format('YYYY-MM-DD'),
         };
         chai.request(server)
             .post('/api/v1/ratings/count')
@@ -196,12 +198,7 @@ describe('/POST ratings count one day', () => {
 });
 describe('/POST ratings', () => {
     it('Should create new rating', async () => {
-        const settings = await model.settings.findOne({
-            order: [
-                ['createdAt', 'DESC'],
-            ],
-            raw: true,
-        });
+        const settings = await getCurrentSettings();
 
         const emoticon = await model.emoticons.findOne({
             where: {
@@ -223,21 +220,21 @@ describe('/POST ratings', () => {
                 res.body.should.be.a('object');
                 res.body.should.have.property('error');
                 res.body.should.have.property('data');
+                res.body.error.should.be.a('boolean');
                 res.body.error.should.be.eql(false);
                 res.body.data.should.be.a('object');
-                res.body.error.should.be.a('boolean');
                 res.body.data.should.have.property('emoticonId');
                 res.body.data.should.have.property('time');
                 res.body.data.should.have.property('settingId');
                 res.body.data.should.have.property('createdAt');
                 res.body.data.should.have.property('updatedAt');
                 res.body.should.have.property('message')
-                    .eql('New reaction have been added.');
+                    .eql('New reaction has been added.');
             });
     });
-    it('it should not POST an new rating without emoticonsId', (done) => {
+    it('it should not POST an new rating without emoticonId', (done) => {
         const rating = {
-            emoticonId: null
+            emoticonId: null,
         };
         chai.request(server)
             .post('/api/v1/ratings')
