@@ -9,6 +9,23 @@ const model = require('../models/index');
 // eslint-disable-next-line prefer-destructuring
 const Op = sequelize.Op;
 
+const classic = (error, data, message = '') => {
+    const res = {
+        error,
+        data,
+        message,
+    };
+    return res;
+};
+const withEmoticons = (error, data, emoticons) => {
+    const res = {
+        error,
+        data,
+        emoticons,
+    };
+    return res;
+};
+
 
 const getCurrentSettings = () => {
     const settings = model.settings.findOne({
@@ -118,15 +135,9 @@ const checkRatingsStatus = async (settings) => {
 exports.getAllRatings = async (req, res) => {
     model.ratings.findAll({
             include: [model.settings],
-        }).then(ratings => res.json({
-            error: false,
-            data: ratings,
-        }))
-        .catch(() => res.json({
-            error: true,
-            data: [],
-            message: 'Server error',
-        }));
+        })
+        .then(ratings => res.json(classic(false, ratings)))
+        .catch(() => res.json(classic(true, [], 'Server error')));
 };
 exports.getRatingsByHour = async (req, res) => {
     const {
@@ -169,10 +180,7 @@ exports.getRatingsByHour = async (req, res) => {
                 raw: true,
             })
             .then(setting => setting)
-            .catch(() => res.json({
-                error: true,
-                message: 'Server error',
-            })));
+            .catch(() => res.json(classic(true, [], 'Server error'))));
     }
 
     const dataArray = [];
@@ -201,11 +209,7 @@ exports.getRatingsByHour = async (req, res) => {
             dataArray[i].ratings = result[i];
         }
 
-        return res.json({
-            error: false,
-            data: dataArray,
-            emoticons,
-        });
+        return res.json(withEmoticons(false, dataArray, emoticons));
     });
 };
 exports.getRatingsByDays = async (req, res) => {
@@ -215,9 +219,8 @@ exports.getRatingsByDays = async (req, res) => {
     } = req.body;
 
     const settings = await getCurrentSettings();
-    // eslint-disable-next-line max-len
-    const emoticons = await getEmoticonsForSettings(settings.emoticonsGroupId, settings.emoticonNumber);
-
+    const emoticons = await getEmoticonsForSettings(settings.emoticonsGroupId,
+        settings.emoticonNumber);
     let start = new Date(startDate);
     const end = new Date(endDate);
 
@@ -250,10 +253,7 @@ exports.getRatingsByDays = async (req, res) => {
                 raw: true,
             })
             .then(ratings => ratings)
-            .catch(() => res.json({
-                error: true,
-                message: 'Server error',
-            })));
+            .catch(() => res.json(classic(true, [], 'Server error'))));
 
 
         start.setDate(start.getDate() + 1);
@@ -286,11 +286,7 @@ exports.getRatingsByDays = async (req, res) => {
             dataArray[i].ratings = result[i];
         }
 
-        res.json({
-            error: false,
-            data: dataArray,
-            emoticons,
-        });
+        return res.json(withEmoticons(false, dataArray, emoticons));
     });
 };
 exports.getCountOfRatings = async (req, res) => {
@@ -329,16 +325,9 @@ exports.getCountOfRatings = async (req, res) => {
                 }
                 newEmoticons.push(emoticons[i]);
             }
-            return res.json({
-                error: false,
-                data: newEmoticons,
-            });
+            return res.json(classic(false, newEmoticons));
         })
-        .catch(() => res.json({
-            error: true,
-            data: [],
-            message: 'Server error',
-        }));
+        .catch(() => res.json(classic(true, [], 'Server error')));
 };
 exports.getCountOfRatingsDay = async (req, res) => {
     const {
@@ -358,7 +347,6 @@ exports.getCountOfRatingsDay = async (req, res) => {
             attributes: [
                 'emoticonId',
                 [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
-
             ],
             group: ['emoticonId'],
             raw: true,
@@ -375,16 +363,10 @@ exports.getCountOfRatingsDay = async (req, res) => {
                 }
                 newEmoticons.push(emoticons[i]);
             }
-            return res.json({
-                error: false,
-                data: newEmoticons,
-            });
+
+            return res.json(classic(false, newEmoticons));
         })
-        .catch(() => res.json({
-            error: true,
-            data: [],
-            message: 'Server error',
-        }));
+        .catch(() => res.json(classic(true, [], 'Server error')));
 };
 exports.getOneRating = async (req, res) => {
     const ratingId = req.params.id;
@@ -394,14 +376,8 @@ exports.getOneRating = async (req, res) => {
                 id: ratingId,
             },
         })
-        .then(rating => res.json({
-            error: false,
-            data: rating,
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .then(rating => res.json(classic(false, rating)))
+        .catch(() => res.json(classic(true, {}, 'Server error')));
 };
 exports.createManyRatings = async (req, res) => {
     const {
@@ -417,20 +393,14 @@ exports.createManyRatings = async (req, res) => {
                 emoticonId: rating.emoticonId,
                 time: Date(),
                 settingId: settings.id,
-            }).then(ratings => ratings)
-            .catch(() => res.json({
-                error: true,
-                message: 'Server error',
-            })));
+            })
+            .then(ratings => ratings)
+            .catch(() => res.json(classic(true, {}, 'Server error'))));
     });
 
     Promise.all(promises).then((result) => {
         /* const filtered = result.filter(el => el.length > 0); */
-        res.json({
-            error: false,
-            data: result,
-            message: 'Ratings have been created',
-        });
+        res.json(classic(false, result, 'Ratings have been created'));
     });
 };
 exports.createRating = async (req, res) => {
@@ -438,11 +408,7 @@ exports.createRating = async (req, res) => {
         emoticonId,
     } = req.body;
     if (!emoticonId) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'emoticonId not defined',
-        });
+        return res.status(400).json(classic(true, {}, 'emoticonId not defined'));
     }
 
     const emoticon = await model.emoticons.findOne({
@@ -455,34 +421,24 @@ exports.createRating = async (req, res) => {
     const settings = await getCurrentSettings();
 
     if (emoticon.emoticonsGroupId !== settings.emoticonsGroupId) {
-        res.status(400).json({
-            error: true,
-            message: 'Emoticon not valid!',
-        });
-    } else {
-        model.ratings.create({
-                emoticonId: emoticon.id,
-                time: Date(),
-                settingId: settings.id,
-            })
-            .then((ratings) => {
-                const data = ratings.dataValues;
-                data.time = moment.utc(ratings.dataValues.time).format('YYYY-MM-DD HH:mm:ss');
-                io.emit('newRating', ratings);
-                res.status(201).json({
-                    error: false,
-                    data: ratings,
-                    message: 'New reaction has been added.',
-                });
-            })
-            .then(() => {
-                checkRatingsStatus(settings);
-            })
-            .catch(() => res.json({
-                error: true,
-                message: 'Server error',
-            }));
+        return res.status(400).json(classic(true, {}, 'Emoticon not valid!'));
     }
+    model.ratings.create({
+            emoticonId: emoticon.id,
+            time: Date(),
+            settingId: settings.id,
+        })
+        .then((ratings) => {
+            const data = ratings.dataValues;
+            data.time = moment.utc(ratings.dataValues.time).format('YYYY-MM-DD HH:mm:ss');
+            io.emit('newRating', ratings);
+            res.status(201).json(classic(false, ratings, 'New reaction has been added.'));
+        })
+        .then(() => {
+            checkRatingsStatus(settings);
+        })
+        .catch(() => res.json(classic(true, {}, 'Server error')));
+
 };
 exports.updateRating = async (req, res) => {
     const ratingId = req.params.id;
@@ -498,15 +454,8 @@ exports.updateRating = async (req, res) => {
                 id: ratingId,
             },
         })
-        .then(rating => res.json({
-            error: false,
-            message: 'Rating has been updated.',
-            data: rating,
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .then(rating => res.json(classic(false, rating, 'Rating has been updated')))
+        .catch(() => res.json(classic(true, {}, 'Server error')));
 };
 exports.deleteRating = async (req, res) => {
     const ratingId = req.params.id;
@@ -516,13 +465,6 @@ exports.deleteRating = async (req, res) => {
                 id: ratingId,
             },
         })
-        .then(rating => res.json({
-            error: false,
-            message: 'Rating has been deleted.',
-            data: rating,
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .then(rating => res.json(classic(false, rating, 'Rating has been deleted')))
+        .catch(() => res.json(classic(true, {}, 'Server error')));
 };
