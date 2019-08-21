@@ -1,16 +1,13 @@
 /* eslint-disable consistent-return */
 const model = require('../models/index');
+const response = require('../helpers/responses');
 
 exports.getAllEmoticons = async (req, res) => {
     model.emoticons.findAll().then(emoticons => res.json({
             error: false,
             data: emoticons,
         }))
-        .catch(() => res.json({
-            error: true,
-            data: [],
-            message: 'Server error',
-        }));
+        .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
 exports.createEmoticon = async (req, res) => {
     const {
@@ -21,32 +18,16 @@ exports.createEmoticon = async (req, res) => {
     } = req.body;
 
     if (!name) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'Name not defined',
-        });
+        return res.status(400).json(response.classic(true, {}, 'Name not defined'));
     }
     if (!symbol) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'Symbol not defined',
-        });
+        return res.status(400).json(response.classic(true, {}, 'Symbol not defined'));
     }
     if (!emoticonsGroupId) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'emoticonsGroupId not defined',
-        });
+        return res.status(400).json(response.classic(true, {}, 'emoticonsGroupId not defined'));
     }
     if (!value) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'Value not defined',
-        });
+        return res.status(400).json(response.classic(true, {}, 'Value not defined'));
     }
 
     await model.emoticons.findAll({
@@ -56,10 +37,7 @@ exports.createEmoticon = async (req, res) => {
         raw: true,
     }).then((emoticons) => {
         if (emoticons && emoticons.length >= 5) {
-            return res.json({
-                error: true,
-                message: 'Emoticons group already has 5 emoticons!',
-            });
+            return res.json(response.classic(true, {}, 'Emoticons group already has 5 emoticons!'));
         }
         return emoticons;
     });
@@ -71,16 +49,8 @@ exports.createEmoticon = async (req, res) => {
             emoticonsGroupId,
             value,
         })
-        .then(emoticons => res.status(201).json({
-            error: false,
-            data: emoticons,
-            message: 'New emoticon has been created.',
-        }))
-        .catch(() => res.json({
-            error: true,
-            data: [],
-            message: 'Server error',
-        }));
+        .then(emoticon => res.status(201).json(response.classic(false, emoticon, 'Emoticon has been updated.')))
+        .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
 exports.updateEmoticon = async (req, res) => {
     const {
@@ -100,11 +70,7 @@ exports.updateEmoticon = async (req, res) => {
         },
     });
     if (!emoticonExist) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'No emoticons with that Id',
-        });
+        return res.status(400).json(response.classic(true, {}, 'Emoticon does not exist'));
     }
     model.emoticons.update({
             name,
@@ -116,15 +82,8 @@ exports.updateEmoticon = async (req, res) => {
                 id,
             },
         })
-        .then(emoticons => res.json({
-            error: false,
-            data: emoticons,
-            message: 'Emoticon has been updated.',
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .then(emoticon => res.json(response.classic(false, emoticon, 'Emoticon has been updated.')))
+        .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
 
 exports.getOneEmoticon = async (req, res) => {
@@ -138,14 +97,8 @@ exports.getOneEmoticon = async (req, res) => {
                 model: model.emoticonsGroups,
             }],
         })
-        .then(emoticons => res.json({
-            error: false,
-            data: emoticons,
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .then(emoticons => res.json(response.classic(false, emoticons)))
+        .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
 exports.deleteEmoticon = async (req, res) => {
     const EmoticonsId = req.params.id;
@@ -155,13 +108,6 @@ exports.deleteEmoticon = async (req, res) => {
                 id: EmoticonsId,
             },
         })
-        .then(status => res.json({
-            error: false,
-            data: status,
-            message: 'Emoticon has been deleted.',
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .then(emoticon => res.json(response.classic(false, emoticon, 'Emoticon has been deleted.')))
+        .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };

@@ -1,6 +1,8 @@
 const model = require('../models/index');
 const io = require('../server');
 
+const response = require('../helpers/responses');
+
 const getEmoticonsForSettings = async (emoticonsGroupId, emoticonNumber) => {
     const emoticons = await model.emoticons.findAll({
         where: {
@@ -51,16 +53,9 @@ exports.getAllSettings = async (req, res) => {
             ],
         })
         .then(
-            settings => res.json({
-                error: false,
-                data: settings,
-            }),
+            settings => res.json(response.classic(false, settings)),
         )
-        .catch(error => res.json({
-            error: true,
-            data: [],
-            message: 'Server error',
-        }));
+        .catch(() => res.json(response.classic(true, [], 'Server error')));
 };
 exports.getLastSettings = async (req, res) => {
     model.settings.findOne({
@@ -82,17 +77,9 @@ exports.getLastSettings = async (req, res) => {
         .then(async (settings) => {
             // eslint-disable-next-line max-len
             const filteredEmoticons = await getEmoticonsForSettings(settings.emoticonsGroupId, settings.emoticonNumber);
-            res.json({
-                error: false,
-                data: settings,
-                emoticons: filteredEmoticons,
-            });
+            res.json(response.withEmoticons(false, settings, filteredEmoticons));
         })
-        .catch(() => res.json({
-            error: true,
-            data: [],
-            message: 'Server error',
-        }));
+        .catch(() => res.json(response.classic(true, [], 'Server error')));
 };
 exports.getOneSettings = async (req, res) => {
     const settingsId = req.params.id;
@@ -134,16 +121,9 @@ exports.getOneSettings = async (req, res) => {
             } else {
                 filteredEmoticons = emoticons;
             }
-            res.json({
-                error: false,
-                data: settings,
-                emoticons: filteredEmoticons,
-            });
+            res.json(response.withEmoticons(false, settings, filteredEmoticons));
         })
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .catch(() => res.json(response.classic(true, [], 'Server error')));
 };
 exports.createSettings = async (req, res) => {
     const {
@@ -189,16 +169,9 @@ exports.createSettings = async (req, res) => {
             // Send live info to client
             io.emit('newSettings', socketData);
 
-            return res.json({
-                error: false,
-                data: settings,
-                message: 'Settings have ben updated.',
-            });
+            return res.status(201).json(response.classic(false, settings, 'Settings have been created'));
         })
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .catch(() => res.json(response.classic(true, [], 'Server error')));
 };
 exports.updateSettings = async (req, res) => {
     const settingsId = req.params.id;
@@ -211,55 +184,30 @@ exports.updateSettings = async (req, res) => {
     } = req.body;
 
     if (!emoticonNumber) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'emoticonNumber not defined',
-        });
+        return res.status(400).json(response.classic(true, {}, 'emoticonNumber not defined!'));
     }
     if (!messageId) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'messageId not defined',
-        });
+        return res.status(400).json(response.classic(true, {}, 'messageId not defined!'));
     }
     if (!emoticonsGroupId) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'emoticonsGroupId not defined',
-        });
+        return res.status(400).json(response.classic(true, {}, 'emoticonsGroupId not defined!'));
     }
     if (!userId) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'userId not defined',
-        });
+        return res.status(400).json(response.classic(true, {}, 'userId not defined!'));
     }
 
 
-    if (emoticonNumber && !(Number.isNaN(emoticonNumber))) {
+    if (!(Number.isNaN(emoticonNumber))) {
         if (emoticonNumber < 3 || emoticonNumber > 5) {
-            return res.status(400).json({
-                error: true,
-                message: 'Number of emoticons not in specified range!',
-            });
+            return res.status(400).json(response.classic(true, {}, 'Number of emoticons not in specified range'));
         }
     } else {
-        return res.status(400).json({
-            error: true,
-            message: 'Number of emoticons not set!',
-        });
+        return res.status(400).json(response.classic(true, {}, 'Number of emoticons not set'));
     }
 
     if (messageTimeout) {
         if (messageTimeout < 0 || messageTimeout > 10) {
-            return res.status(400).json({
-                error: true,
-                message: 'Message timeout should be in range 0-10 sec!',
-            });
+            return res.status(400).json(response.classic(true, {}, 'Message timeout should be in range 0-10 sec'));
         }
     }
 
@@ -278,10 +226,7 @@ exports.updateSettings = async (req, res) => {
             raw: true,
         })
         .then(setting => setting)
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .catch(() => res.json(response.classic(true, [], 'Server error')));
 
     // if emoticonNumber not changed => update, else => create new
     if (old !== null) {
@@ -303,16 +248,9 @@ exports.updateSettings = async (req, res) => {
                 // Send live info to client
                 io.emit('newSettings', socketData);
 
-                res.json({
-                    error: false,
-                    data: settings,
-                    message: 'Settings have been updated.',
-                });
+                res.json(response.Function(false, settings, 'Settings have been updated'));
             })
-            .catch(() => res.json({
-                error: true,
-                message: 'Server error',
-            }));
+            .catch(() => res.status(400).json(response.classic(true, [], 'Server error')));
     } else {
         model.settings.create({
                 emoticonNumber,
@@ -329,16 +267,9 @@ exports.updateSettings = async (req, res) => {
                 // Send live info to client
                 io.emit('newSettings', socketData);
 
-                res.status(201).json({
-                    error: false,
-                    data: settings,
-                    message: 'Settings have been created.',
-                });
+                res.status(201).json(response.classic(false, settings, 'Settings have been created'));
             })
-            .catch(() => res.json({
-                error: true,
-                message: 'Server error',
-            }));
+            .catch(() => res.status(400).json(response.classic(true, [], 'Server error')));
     }
 };
 exports.deleteSettings = async (req, res) => {
@@ -349,39 +280,6 @@ exports.deleteSettings = async (req, res) => {
                 id: settings,
             },
         })
-        .then(resStatus => res.json({
-            error: false,
-            status: resStatus,
-            message: 'Settings have been deleted.',
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
-};
-exports.testRouteSettings = async (req, res) => {
-    const {
-        emoticonNumber,
-        emoticonsGroupId,
-    } = req.body;
-
-    model.settings.findAll({
-            where: {
-                emoticonsGroupId,
-                emoticonNumber,
-            },
-            attributes: ['id', 'emoticonNumber', 'messageId', 'emoticonsGroupId', 'messageTimeout', 'userId'],
-            raw: true,
-        })
-        .then(async (settings) => {
-            res.json({
-                error: false,
-                data: settings,
-            });
-        })
-        .catch(() => res.json({
-            error: true,
-            data: [],
-            message: 'Server error',
-        }));
+        .then(setting => res.json(response.classic(false, setting, 'Settings have been deleted')))
+        .catch(() => res.json(response.classic(true, [], 'Server error')));
 };

@@ -1,16 +1,13 @@
 const model = require('../models/index');
+const response = require('../helpers/responses');
+
 
 exports.getAllMessages = async (req, res) => {
     model.messages.findAll({})
-        .then(messages => res.json({
-            error: false,
-            data: messages,
-        }))
-        .catch(() => res.json({
-            error: true,
-            data: [],
-            message: 'Server error',
-        }));
+        .then(messages => res.json(response.classic(false, messages)))
+        .catch(() => res.json(
+            response.classic(true, [], 'Server error'),
+        ));
 };
 exports.createMessage = async (req, res) => {
     const {
@@ -19,33 +16,20 @@ exports.createMessage = async (req, res) => {
     } = req.body;
 
     if (!text) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'Text not defined',
-        });
+        return res.status(400).json(response.classic(true, {}, 'Text not defined!'));
     }
 
     if (text.length < 3 || text.length > 120) {
-        res.status(400).json({
-            error: true,
-            message: 'Text must be between 3 and 120 characters!',
-        });
-    } else {
-        model.messages.create({
-                text,
-                language,
-            })
-            .then(messages => res.status(201).json({
-                error: false,
-                data: messages,
-                message: 'New message has been created.',
-            }))
-            .catch(() => res.json({
-                error: true,
-                message: 'Server error',
-            }));
+        return res.status(400).json(response.classic(true, {}, 'Text must be between 3 and 120 characters!'));
     }
+    model.messages.create({
+            text,
+            language,
+        })
+        .then(messages => res.status(201).json(
+            response.classic(false, messages, 'New message has been created.'),
+        ))
+        .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
 exports.createMessageForSettings = async (req, res) => {
     const {
@@ -55,12 +39,12 @@ exports.createMessageForSettings = async (req, res) => {
 
     // eslint-disable-next-line prefer-destructuring
     const settingId = req.params.settingId;
+    if (!text) {
+        return res.status(400).json(response.classic(true, {}, 'Text not defined!'));
+    }
 
     if (text.length < 3 || text.length > 120) {
-        return res.status(400).json({
-            error: true,
-            message: 'Text must be between 3 and 120 characters!',
-        });
+        return res.status(400).json(response.classic(true, {}, 'Text must be between 3 and 120 characters!'));
     }
     model.messages.create({
             text,
@@ -75,15 +59,8 @@ exports.createMessageForSettings = async (req, res) => {
                 },
             });
         })
-        .then(messages => res.json({
-            error: false,
-            data: messages,
-            message: 'Message has been created!',
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .then(messages => res.json(response.classic(false, messages, 'Message has been created!')))
+        .catch(() => res.json(response.classic(true, {}, 'Server error')));
     return 1;
 };
 exports.updateMessage = async (req, res) => {
@@ -94,10 +71,7 @@ exports.updateMessage = async (req, res) => {
     } = req.body;
 
     if (text.length < 3 || text.length > 120) {
-        return res.status(400).json({
-            error: true,
-            message: 'Text must be between 3 and 120 characters!',
-        });
+        return res.status(400).json(response.classic(true, {}, 'Text must be between 3 and 120 characters!'));
     }
     model.messages.update({
             text,
@@ -107,15 +81,8 @@ exports.updateMessage = async (req, res) => {
                 id: messageId,
             },
         })
-        .then(messages => res.json({
-            error: false,
-            data: messages,
-            message: 'Message has been updated!',
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .then(messages => res.json(response.classic(false, messages, 'New message has been updated.')))
+        .catch(() => res.json(response.classic(true, {}, 'Server error')));
     return 1;
 };
 exports.getMessageByLanguage = async (req, res) => {
@@ -126,14 +93,8 @@ exports.getMessageByLanguage = async (req, res) => {
                 language: lang,
             },
         })
-        .then(message => res.json({
-            error: false,
-            data: message,
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .then(message => res.json(response.classic(false, message)))
+        .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
 exports.getOneMessage = async (req, res) => {
     const messageId = req.params.id;
@@ -143,14 +104,8 @@ exports.getOneMessage = async (req, res) => {
                 id: messageId,
             },
         })
-        .then(message => res.json({
-            error: false,
-            data: message,
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .then(message => res.json(response.classic(false, message)))
+        .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
 exports.deleteMessage = async (req, res) => {
     const messageId = req.params.id;
@@ -160,13 +115,6 @@ exports.deleteMessage = async (req, res) => {
                 id: messageId,
             },
         })
-        .then(message => res.json({
-            error: false,
-            data: message,
-            message: 'Message has been deleted.',
-        }))
-        .catch(() => res.json({
-            error: true,
-            message: 'Server error',
-        }));
+        .then(message => res.json(response.classic(false, message, 'New message has been deleted.')))
+        .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };

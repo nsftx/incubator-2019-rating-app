@@ -13,23 +13,24 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+const classic = (error, data, message = '') => {
+    const res = {
+        error,
+        data,
+        message,
+    };
+    return res;
+};
+
 exports.sendInvite = async (req, res) => {
-    const email = req.body.email;
+    const email = req.body;
 
     if (!email) {
-        return res.status(400).json({
-            error: true,
-            data: {},
-            message: 'Email not defined',
-        });
+        return res.status(400).json(classic(true, {}, 'Email not defined'));
     }
 
     if (!emailIsValid(email)) {
-        return res.status(400).json({
-            error: true,
-            message: 'Invalid email',
-            data: email,
-        });
+        return res.status(400).json(classic(true, email, 'Invalid email'));
     }
 
     model.invites.findOne({
@@ -40,11 +41,9 @@ exports.sendInvite = async (req, res) => {
         .then(async (existingInvite) => {
             if (existingInvite) {
                 // console.log('user is: ', currentUser);
-                res.status(400).json({
-                    error: true,
-                    message: 'Invitation already exists!',
-                    data: existingInvite,
-                });
+                res.status(400).json(
+                    classic(true, existingInvite, 'Invitation already exists!'),
+                );
             } else {
                 await model.invites.create({
                     email,
@@ -67,11 +66,9 @@ exports.sendInvite = async (req, res) => {
                         error: false,
                         data: newInvite,
                     });
-                }).catch(() => res.json({
-                    error: true,
-                    data: [],
-                    message: 'Server error, invite not created!',
-                }));
+                }).catch(() => res.json(
+                    classic(true, [], 'Server error'),
+                ));
             }
         });
     return 1;
