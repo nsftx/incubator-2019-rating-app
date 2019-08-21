@@ -18,5 +18,4 @@ router.put('/:id', auth, settingsController.updateSettings);
 /* Delete settings. */
 router.delete('/:id', auth, settingsController.deleteSettings);
 
-router.post('/test', settingsController.testRouteSettings);
 module.exports = router;
