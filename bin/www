@@ -7,11 +7,20 @@
 const debug = require('debug')('app-sequelize:server');
 const http = require('http');
 const cors = require('cors');
+const fs = require('fs');
+
+const https = require('https');
 
 const app = require('../app');
 
 app.use(cors());
 
+https.createServer({
+    key: fs.readFileSync('./key.pem'),
+    cert: fs.readFileSync('./cert.pem'),
+    passphrase: 'Newsmay1!',
+  }, app)
+  .listen(4000);
 
 /**
  * Normalize a port into a number, string, or false.
