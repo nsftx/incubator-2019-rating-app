@@ -18,6 +18,7 @@ module.exports = {
       email: {
         type: Sequelize.STRING(64),
         allowNull: false,
+        unique: true,
       },
       isSuperAdmin: {
         type: Sequelize.BOOLEAN,
@@ -27,6 +28,7 @@ module.exports = {
       googleId: {
         type: Sequelize.STRING(32),
         allowNull: false,
+        unique: true,
       },
       image: {
         type: Sequelize.STRING(1024),
