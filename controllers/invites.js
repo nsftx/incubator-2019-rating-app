@@ -2,6 +2,8 @@ const nodemailer = require('nodemailer');
 const model = require('../models/index');
 require('dotenv').config('/.env');
 
+const response = require('../helpers/responses');
+
 
 const emailIsValid = (email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
 
@@ -26,11 +28,11 @@ exports.sendInvite = async (req, res) => {
     const email = req.body;
 
     if (!email) {
-        return res.status(400).json(classic(true, {}, 'Email not defined'));
+        return res.status(400).json(response.classic(true, {}, 'Email not defined'));
     }
 
     if (!emailIsValid(email)) {
-        return res.status(400).json(classic(true, email, 'Invalid email'));
+        return res.status(400).json(response.classic(true, email, 'Invalid email'));
     }
 
     model.invites.findOne({
@@ -42,7 +44,7 @@ exports.sendInvite = async (req, res) => {
             if (existingInvite) {
                 // console.log('user is: ', currentUser);
                 res.status(400).json(
-                    classic(true, existingInvite, 'Invitation already exists!'),
+                    response.classic(true, existingInvite, 'Invitation already exists!'),
                 );
             } else {
                 await model.invites.create({
@@ -62,12 +64,9 @@ exports.sendInvite = async (req, res) => {
                             console.log(`Email sent: ${info.response}`);
                         }
                     });
-                    return res.json({
-                        error: false,
-                        data: newInvite,
-                    });
+                    return res.json(response.classic(false, newInvite));
                 }).catch(() => res.json(
-                    classic(true, [], 'Server error'),
+                    response.classic(true, [], 'Server error'),
                 ));
             }
         });
