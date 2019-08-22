@@ -1,7 +1,7 @@
 const model = require('../models/index');
 const response = require('../helpers/responses');
 
-exports.getAllGroups = async (req, res) => {
+exports.getAllGroups = (req, res) => {
     model.emoticonsGroups.findAll({
             include: [model.emoticons],
             order: [
@@ -12,7 +12,7 @@ exports.getAllGroups = async (req, res) => {
         .then(emoticonsGroups => res.json(response.classic(false, emoticonsGroups)))
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
-exports.getOne = async (req, res) => {
+exports.getOne = (req, res) => {
     const EmoticonsGroupsId = req.params.id;
 
     model.settings.findOne({
@@ -23,7 +23,7 @@ exports.getOne = async (req, res) => {
         .then(emoticonsGroup => res.json(response.classic(false, emoticonsGroup)))
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
-exports.createGroup = async (req, res) => {
+exports.createGroup = (req, res) => {
     const {
         name,
     } = req.body;
@@ -31,13 +31,13 @@ exports.createGroup = async (req, res) => {
     if (!name) {
         return res.status(400).json(response.classic(true, {}, 'Name not defined!'));
     }
-    model.emoticonsGroups.create({
+    return model.emoticonsGroups.create({
             name,
         })
         .then(emoticonsGroups => res.status(201).json(response.classic(false, emoticonsGroups, 'New emoticon group has been created.')))
         .catch(() => res.json(response.classic(true, [], 'Server error')));
 };
-exports.createMany = async (req, res) => {
+exports.createMany = (req, res) => {
     const {
         name,
         emoticonsArray,
@@ -49,7 +49,7 @@ exports.createMany = async (req, res) => {
     if (!emoticonsArray) {
         return res.status(400).json(response.classic(true, {}, 'emoticonsArray not defined'));
     }
-    await model.emoticonsGroups.create({
+    return model.emoticonsGroups.create({
             name,
         })
         .then((group) => {
@@ -68,10 +68,9 @@ exports.createMany = async (req, res) => {
                 }));
             });
 
-            Promise.all(promises).then((result) => {
-                /* const filtered = result.filter(el => el.length > 0); */
-                return res.status(201).json(response.classic(false, result, 'New emoticon group has been created.'));
-            });
+            return Promise.all(promises).then(result => (res.status(201).json(
+                response.classic(false, result, 'New emoticon group has been created.'),
+            )));
         })
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
@@ -90,7 +89,7 @@ exports.updateGroup = async (req, res) => {
         return res.status(400).json(response.classic(true, {}, 'Emoticon group does not exist'));
     }
 
-    model.emoticonsGroups.update({
+    return model.emoticonsGroups.update({
             name,
         }, {
             where: {
@@ -100,7 +99,7 @@ exports.updateGroup = async (req, res) => {
         .then(emoticonsGroups => res.json(response.classic(false, emoticonsGroups, 'Emoticons group has been updated.')))
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
-exports.deleteGroup = async (req, res) => {
+exports.deleteGroup = (req, res) => {
     const emoticonsGroupId = req.params.id;
 
     model.emoticonsGroups.destroy({
