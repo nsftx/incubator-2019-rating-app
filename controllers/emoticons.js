@@ -2,7 +2,7 @@
 const model = require('../models/index');
 const response = require('../helpers/responses');
 
-exports.getAllEmoticons = async (req, res) => {
+exports.getAllEmoticons = (req, res) => {
     model.emoticons.findAll().then(emoticons => res.json({
             error: false,
             data: emoticons,
@@ -86,7 +86,7 @@ exports.updateEmoticon = async (req, res) => {
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
 
-exports.getOneEmoticon = async (req, res) => {
+exports.getOneEmoticon = (req, res) => {
     const EmoticonsId = req.params.id;
 
     model.settings.findOne({
@@ -100,7 +100,7 @@ exports.getOneEmoticon = async (req, res) => {
         .then(emoticons => res.json(response.classic(false, emoticons)))
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
-exports.deleteEmoticon = async (req, res) => {
+exports.deleteEmoticon = (req, res) => {
     const EmoticonsId = req.params.id;
 
     model.emoticons.destroy({

@@ -2,14 +2,14 @@ const model = require('../models/index');
 const response = require('../helpers/responses');
 
 
-exports.getAllMessages = async (req, res) => {
+exports.getAllMessages = (req, res) => {
     model.messages.findAll({})
         .then(messages => res.json(response.classic(false, messages)))
         .catch(() => res.json(
             response.classic(true, [], 'Server error'),
         ));
 };
-exports.createMessage = async (req, res) => {
+exports.createMessage = (req, res) => {
     const {
         text,
         language,
@@ -22,7 +22,7 @@ exports.createMessage = async (req, res) => {
     if (text.length < 3 || text.length > 120) {
         return res.status(400).json(response.classic(true, {}, 'Text must be between 3 and 120 characters!'));
     }
-    model.messages.create({
+    return model.messages.create({
             text,
             language,
         })
@@ -31,7 +31,7 @@ exports.createMessage = async (req, res) => {
         ))
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
-exports.createMessageForSettings = async (req, res) => {
+exports.createMessageForSettings = (req, res) => {
     const {
         text,
         language,
@@ -46,7 +46,7 @@ exports.createMessageForSettings = async (req, res) => {
     if (text.length < 3 || text.length > 120) {
         return res.status(400).json(response.classic(true, {}, 'Text must be between 3 and 120 characters!'));
     }
-    model.messages.create({
+    return model.messages.create({
             text,
             language,
         })
@@ -61,9 +61,8 @@ exports.createMessageForSettings = async (req, res) => {
         })
         .then(messages => res.json(response.classic(false, messages, 'Message has been created!')))
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
-    return 1;
 };
-exports.updateMessage = async (req, res) => {
+exports.updateMessage = (req, res) => {
     const messageId = req.params.id;
     const {
         text,
@@ -85,7 +84,7 @@ exports.updateMessage = async (req, res) => {
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
     return 1;
 };
-exports.getMessageByLanguage = async (req, res) => {
+exports.getMessageByLanguage = (req, res) => {
     const lang = req.params;
 
     model.messages.findAll({
@@ -96,7 +95,7 @@ exports.getMessageByLanguage = async (req, res) => {
         .then(message => res.json(response.classic(false, message)))
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
-exports.getOneMessage = async (req, res) => {
+exports.getOneMessage = (req, res) => {
     const messageId = req.params.id;
 
     model.messages.findOne({
@@ -107,7 +106,7 @@ exports.getOneMessage = async (req, res) => {
         .then(message => res.json(response.classic(false, message)))
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };
-exports.deleteMessage = async (req, res) => {
+exports.deleteMessage = (req, res) => {
     const messageId = req.params.id;
 
     model.messages.destroy({

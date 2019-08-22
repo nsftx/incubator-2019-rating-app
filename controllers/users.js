@@ -6,10 +6,11 @@ const {
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const model = require('../models/index');
+const response = require('../helpers/responses');
 
-const updateToken = async (userId, newToken) => {
+const updateToken = (userId, newToken) => {
     /* console.log(userId, newToken); */
-    await model.users.update({
+    model.users.update({
             token: newToken,
         }, {
             where: {
@@ -19,7 +20,7 @@ const updateToken = async (userId, newToken) => {
         .error(error => console.log(error));
 };
 
-exports.userlogin = async (req, res) => {
+exports.userlogin = (req, res) => {
     const token = req.headers.authorization;
     async function verify() {
         const ticket = await client.verifyIdToken({
@@ -52,11 +53,7 @@ exports.userlogin = async (req, res) => {
                 },
             }).then((existingInvite) => {
                 if (!existingInvite) {
-                    return res.status(400).json({
-                        error: true,
-                        data: 'update error',
-                        message: 'Invitation for user does not exist',
-                    });
+                    return res.status(400).json(response.classic(true, {}, 'Invitation does not exist'));
                 }
                 model.users.create({
                     googleId: user.sub,
@@ -71,93 +68,56 @@ exports.userlogin = async (req, res) => {
                         existingUser: false,
                         data: newUser,
                     });
-                }).catch(() => res.json({
-                    error: true,
-                    message: 'Error creating user!',
-                }));
-            }).catch(() => res.json({
-                error: true,
-                message: 'Login error!',
-            }));
-        }).catch(() => res.json({
-            error: true,
-            message: 'Finding user error!',
-        }));
+                }).catch(() => res.json(response.classic(true, {}, 'Error creating user!')));
+            }).catch(() => res.json(response.classic(true, {}, 'Login error!')));
+        }).catch(() => res.json(response.classic(true, {}, 'User not found!')));
     }
-    verify().catch(() => res.status(401).json({
-        error: true,
-        data: 'User not found or token expired',
-    }));
+    verify().catch(() => res.status(401).json(response.classic(true, {}, 'User not found or token expired!')));
 };
 
-exports.getUserByEmail = async (req, res) => {
+exports.getUserByEmail = (req, res) => {
     const {
         email,
     } = req.body;
 
-    await model.users.findOne({
+    model.users.findOne({
             where: {
                 email,
             },
         })
         .then((user) => {
             if (user) {
-                res.json({
-                    error: false,
-                    data: user,
-                    message: '',
-                });
+                res.json(response.classic(false, user));
             } else {
-                res.status(400).json({
-                    error: true,
-                    data: {},
-                    message: 'User not found',
-                });
+                res.status(400).json(response.classic(true, {}, 'User not found!'));
             }
         })
-        .catch(() => res.json({
-            error: true,
-            data: {},
-            message: 'Server error, user not found!',
-        }));
+        .catch(() => res.json(response.classic(true, {}, 'Server error, user not found!')));
 };
-exports.getUser = async (req, res) => {
+exports.getUser = (req, res) => {
     const {
         id,
     } = req.params;
 
-    await model.users.findOne({
+    model.users.findOne({
             where: {
                 id,
             },
         })
         .then((user) => {
             if (user) {
-                res.json({
-                    error: false,
-                    data: user,
-                    message: '',
-                });
+                res.json(response.classic(false, user));
             } else {
-                res.status(400).json({
-                    error: true,
-                    data: {},
-                    message: 'User not found',
-                });
+                res.status(400).json(response.classic(true, {}, 'User not found!'));
             }
         })
-        .catch(() => res.json({
-            error: true,
-            data: {},
-            message: 'Server error, user not found!',
-        }));
+        .catch(() => res.json(response.classic(true, {}, 'Server error, user not found!')));
 };
 
 exports.deleteUser = (req, res) => {
     const {
         email,
     } = req.body;
-    console.log(email);
 
     model.users.destroy({
             where: {
@@ -166,22 +126,10 @@ exports.deleteUser = (req, res) => {
         })
         .then((user) => {
             if (user) {
-                res.json({
-                    error: false,
-                    data: user,
-                    message: 'User deleted',
-                });
+                res.json(response.classic(false, user, 'User deleted'));
             } else {
-                res.status(400).json({
-                    error: true,
-                    data: {},
-                    message: 'User not found',
-                });
+                res.status(400).json(response.classic(true, {}, 'User not found!'));
             }
         })
-        .catch(error => res.json({
-            error: true,
-            data: {},
-            message: error,
-        }));
+        .catch(() => res.json(response.classic(true, {}, 'Server error, user not found!')));
 };

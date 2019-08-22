@@ -57,7 +57,7 @@ exports.getAllSettings = async (req, res) => {
         )
         .catch(() => res.json(response.classic(true, [], 'Server error')));
 };
-exports.getLastSettings = async (req, res) => {
+exports.getLastSettings = (req, res) => {
     model.settings.findOne({
             order: [
                 ['createdAt', 'DESC'],
@@ -81,7 +81,7 @@ exports.getLastSettings = async (req, res) => {
         })
         .catch(() => res.json(response.classic(true, [], 'Server error')));
 };
-exports.getOneSettings = async (req, res) => {
+exports.getOneSettings = (req, res) => {
     const settingsId = req.params.id;
 
     model.settings.findOne({
@@ -125,7 +125,7 @@ exports.getOneSettings = async (req, res) => {
         })
         .catch(() => res.json(response.classic(true, [], 'Server error')));
 };
-exports.createSettings = async (req, res) => {
+exports.createSettings = (req, res) => {
     const {
         emoticonNumber,
         messageId,
@@ -230,7 +230,7 @@ exports.updateSettings = async (req, res) => {
 
     // if emoticonNumber not changed => update, else => create new
     if (old !== null) {
-        model.settings.update({
+        return model.settings.update({
                 emoticonNumber,
                 messageId,
                 messageTimeout,
@@ -251,28 +251,27 @@ exports.updateSettings = async (req, res) => {
                 return res.json(response.classic(false, settings, 'Settings have been updated'));
             })
             .catch(() => res.json(response.classic(true, [], 'Server error on update')));
-    } else {
-        model.settings.create({
-                emoticonNumber,
-                messageId,
-                messageTimeout,
-                emoticonsGroupId,
-                userId,
-            })
-            .then(async (settings) => {
-                socketData.emoticons = await getEmoticonsForSettings(emoticonsGroupId,
-                    emoticonNumber);
-                socketData.data.message = await getMessage(messageId);
-
-                // Send live info to client
-                io.emit('newSettings', socketData);
-
-                return res.status(201).json(response.classic(false, settings, 'Settings have been created'));
-            })
-            .catch(() => res.status(400).json(response.classic(true, [], 'Server error on create')));
     }
+    return model.settings.create({
+            emoticonNumber,
+            messageId,
+            messageTimeout,
+            emoticonsGroupId,
+            userId,
+        })
+        .then(async (settings) => {
+            socketData.emoticons = await getEmoticonsForSettings(emoticonsGroupId,
+                emoticonNumber);
+            socketData.data.message = await getMessage(messageId);
+
+            // Send live info to client
+            io.emit('newSettings', socketData);
+
+            return res.status(201).json(response.classic(false, settings, 'Settings have been created'));
+        })
+        .catch(() => res.status(400).json(response.classic(true, [], 'Server error on create')));
 };
-exports.deleteSettings = async (req, res) => {
+exports.deleteSettings = (req, res) => {
     const settings = req.params.id;
 
     model.settings.destroy({
