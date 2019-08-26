@@ -36,16 +36,7 @@ const getCurrentSettings = () => {
     });
     return settings;
 };
-const getEmoticons = async (groupId) => {
-    const emoticons = await model.emoticons.findAll({
-        where: {
-            emoticonsGroupId: groupId,
-        },
-        attributes: ['id', 'name', 'value', 'symbol'],
-        raw: true,
-    });
-    return emoticons;
-};
+
 const getEmoticonsForSettings = async (emoticonsGroupId, emoticonNumber) => {
     const emoticons = await model.emoticons.findAll({
         where: {
@@ -132,7 +123,7 @@ const checkRatingsStatus = async (settings) => {
     }
 };
 
-exports.getAllRatings = async (req, res) => {
+exports.getAllRatings = (req, res) => {
     model.ratings.findAll({
             include: [model.settings],
         })
@@ -296,7 +287,8 @@ exports.getCountOfRatings = async (req, res) => {
     } = req.body;
 
     const settings = await getCurrentSettings();
-    const emoticons = await getEmoticons(settings.emoticonsGroupId);
+    const emoticons = await getEmoticonsForSettings(settings.emoticonsGroupId,
+        settings.emoticonNumber);
 
 
     model.ratings.findAll({
@@ -352,7 +344,8 @@ exports.getCountOfRatingsDay = async (req, res) => {
             raw: true,
         })
         .then(async (ratings) => {
-            const emoticons = await getEmoticons(settings.emoticonsGroupId);
+            const emoticons = await getEmoticonsForSettings(settings.emoticonsGroupId,
+                settings.emoticonNumber);
             const newEmoticons = [];
             for (let i = 0; i < emoticons.length; i += 1) {
                 emoticons[i].count = 0;
@@ -368,7 +361,7 @@ exports.getCountOfRatingsDay = async (req, res) => {
         })
         .catch(() => res.json(classic(true, [], 'Server error')));
 };
-exports.getOneRating = async (req, res) => {
+exports.getOneRating = (req, res) => {
     const ratingId = req.params.id;
 
     model.ratings.findOne({
@@ -423,7 +416,7 @@ exports.createRating = async (req, res) => {
     if (emoticon.emoticonsGroupId !== settings.emoticonsGroupId) {
         return res.status(400).json(classic(true, {}, 'Emoticon not valid!'));
     }
-    model.ratings.create({
+    return model.ratings.create({
             emoticonId: emoticon.id,
             time: Date(),
             settingId: settings.id,
@@ -438,9 +431,8 @@ exports.createRating = async (req, res) => {
             checkRatingsStatus(settings);
         })
         .catch(() => res.json(classic(true, {}, 'Server error')));
-
 };
-exports.updateRating = async (req, res) => {
+exports.updateRating = (req, res) => {
     const ratingId = req.params.id;
 
     const {
@@ -457,7 +449,7 @@ exports.updateRating = async (req, res) => {
         .then(rating => res.json(classic(false, rating, 'Rating has been updated')))
         .catch(() => res.json(classic(true, {}, 'Server error')));
 };
-exports.deleteRating = async (req, res) => {
+exports.deleteRating = (req, res) => {
     const ratingId = req.params.id;
 
     model.ratings.destroy({
