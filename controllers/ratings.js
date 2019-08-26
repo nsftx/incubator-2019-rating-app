@@ -125,7 +125,7 @@ const checkRatingsStatus = async (settings) => {
 
 exports.getAllRatings = (req, res) => {
     model.ratings.findAll({
-            include: [model.settings],
+            /* include: [model.settings], */
         })
         .then(ratings => res.json(classic(false, ratings)))
         .catch(() => res.json(classic(true, [], 'Server error')));
@@ -457,6 +457,6 @@ exports.deleteRating = (req, res) => {
                 id: ratingId,
             },
         })
-        .then(rating => res.json(classic(false, rating, 'Rating has been deleted')))
+        .then(rating => res.json(classic(false, rating, 'Rating has been deleted.')))
         .catch(() => res.json(classic(true, {}, 'Server error')));
 };
