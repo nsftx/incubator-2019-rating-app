@@ -430,7 +430,10 @@ exports.createRating = async (req, res) => {
         .then(() => {
             checkRatingsStatus(settings);
         })
-        .catch(() => res.json(classic(true, {}, 'Server error')));
+        .catch((e) => {
+            console.log(e);
+            return res.json(classic(true, {}, 'Server error'));
+        });
 };
 exports.updateRating = (req, res) => {
     const ratingId = req.params.id;
