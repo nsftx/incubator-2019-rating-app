@@ -48,8 +48,8 @@ exports.sendInvite = (req, res) => {
                 const mailOptions = {
                     from: process.env.APP_EMAIL,
                     to: email,
-                    subject: 'App invite test',
-                    text: 'That was easy!',
+                    subject: 'Ratings app invitation',
+                    text: 'You are invited to be administrator of ratings app',
                 };
                 transporter.sendMail(mailOptions, (error, info) => {
                     if (error) {
