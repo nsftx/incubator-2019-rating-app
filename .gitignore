@@ -1,5 +1,5 @@
 node_modules
 .env
-cert.pem
-key.pem
-private.key
+csr.pem
+private-key.pem
+public-cert.pem
