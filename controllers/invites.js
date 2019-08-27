@@ -58,7 +58,7 @@ exports.sendInvite = (req, res) => {
                         console.log(`Email sent: ${info.response}`);
                     }
                 });
-                return res.json(response.classic(false, newInvite, 'Invitation sent!'));
+                return res.status(201).json(response.classic(false, newInvite, 'Invitation sent!'));
             }).catch(() => res.json(
                 response.classic(true, [], 'Server error'),
             ));
