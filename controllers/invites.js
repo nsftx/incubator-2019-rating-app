@@ -49,7 +49,7 @@ exports.sendInvite = (req, res) => {
                     from: process.env.APP_EMAIL,
                     to: email,
                     subject: 'Ratings app invitation',
-                    text: 'You are invited to be administrator of ratings app',
+                    text: 'Hello, \n\nYou have been invited to be administrator of ratings app: \nhttps://incubator-2019-rating-admin.netlify.com \n\n Best regards, \n\n Ratings app team',
                 };
                 transporter.sendMail(mailOptions, (error, info) => {
                     if (error) {
