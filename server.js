@@ -16,7 +16,7 @@ wss.on('connection', (ws) => {
     wss.on('newRating', (data) => {
         ws.send(JSON.stringify(data));
     });
-wss.on('newSettings', (data) => {
+    wss.on('newSettings', (data) => {
         ws.send(JSON.stringify(data));
     });
 });
