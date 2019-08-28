@@ -4,10 +4,10 @@ const WebSocket = require('ws');
 require('dotenv').config('/.env');
 
 const server = https.createServer({
-    key: fs.readFileSync('./private-key.pem'),
-    cert: fs.readFileSync('./public-cert.pem'),
-    ca: fs.readFileSync('./public-cert.pem'),
+       key: fs.readFileSync('/etc/letsencrypt/live/ratingsapp.ddns.net/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/ratingsapp.ddns.net/fullchain.pem'),
 });
+
 const wss = new WebSocket.Server({
     server,
 });
@@ -16,7 +16,11 @@ wss.on('connection', (ws) => {
     wss.on('newRating', (data) => {
         ws.send(JSON.stringify(data));
     });
+wss.on('newSettings', (data) => {
+        ws.send(JSON.stringify(data));
+    });
 });
+
 
 server.listen(process.env.SOCKET_PORT);
 
