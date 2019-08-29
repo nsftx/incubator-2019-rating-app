@@ -14,11 +14,11 @@ chai.use(chaiHttp);
 
 const getEmoticonsGroup = async () => {
     const group = await model.emoticonsGroups.findOne({
-            order: [
-                ['id', 'DESC'],
-            ],
-            raw: true,
-        });
+        order: [
+            ['id', 'DESC'],
+        ],
+        raw: true,
+    });
     return group;
 };
 
@@ -135,8 +135,6 @@ describe('/DELETE one emoticonsGroup', () => {
                 res.should.have.status(200);
                 res.body.should.be.a('object');
                 res.body.should.have.property('error');
-                /* res.body.error.should.be.false;
-                res.body.error.should.be.a('boolean'); */
                 res.body.should.have.property('message')
                     .eql('Emoticons group has been deleted.');
             });

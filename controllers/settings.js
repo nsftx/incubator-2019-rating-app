@@ -75,8 +75,8 @@ exports.getLastSettings = (req, res) => {
             ],
         })
         .then(async (settings) => {
-            // eslint-disable-next-line max-len
-            const filteredEmoticons = await getEmoticonsForSettings(settings.emoticonsGroupId, settings.emoticonNumber);
+            const filteredEmoticons = await getEmoticonsForSettings(settings.emoticonsGroupId,
+                settings.emoticonNumber);
             res.json(response.withEmoticons(false, settings, filteredEmoticons));
         })
         .catch(() => res.json(response.classic(true, [], 'Server error')));
@@ -154,6 +154,7 @@ exports.createSettings = (req, res) => {
         }
     }
     const socketData = {};
+    socketData.type = 'settings';
     socketData.error = false;
     socketData.data = req.body;
 
@@ -212,6 +213,7 @@ exports.updateSettings = async (req, res) => {
     }
 
     const socketData = {};
+    socketData.type = 'settings';
     socketData.error = false;
     socketData.data = req.body;
 

@@ -9,7 +9,6 @@ const model = require('../models/index');
 const response = require('../helpers/responses');
 
 const updateToken = (userId, newToken) => {
-    /* console.log(userId, newToken); */
     model.users.update({
             token: newToken,
         }, {
@@ -26,8 +25,6 @@ exports.userlogin = (req, res) => {
         const ticket = await client.verifyIdToken({
             idToken: token,
             audience: process.env.GOOGLE_CLIENT_ID,
-            // Or, if multiple clients access the backend:
-            // [CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
         });
         const user = ticket.getPayload();
 
