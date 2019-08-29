@@ -16,9 +16,9 @@ const app = require('../app');
 app.use(cors());
 
 https.createServer({
-    key: fs.readFileSync('./key.pem'),
-    cert: fs.readFileSync('./cert.pem'),
-    passphrase: 'Newsmay1!',
+    key: fs.readFileSync('./private-key.pem'),
+    cert: fs.readFileSync('./public-cert.pem'),
+    ca: fs.readFileSync('./public-cert.pem'),
   }, app)
   .listen(4000);
 
@@ -29,7 +29,7 @@ https.createServer({
 function normalizePort(val) {
   const port = parseInt(val, 10);
 
-  if (isNaN(port)) {
+  if (Number.isNaN(port)) {
     // named pipe
     return val;
   }

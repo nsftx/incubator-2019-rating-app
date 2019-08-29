@@ -37,10 +37,6 @@ describe('/GET/:id one emoticon', () => {
             ],
             raw: true,
         });
-        /* const emoticon = {
-                    id: 117
-                };
-         */
 
         chai.request(server)
             .get(`/api/v1/emoticons/${emoticon.id}`)
@@ -138,7 +134,9 @@ describe('/PUT one emoticon', () => {
 describe('/DELETE one emoticon', () => {
     it('it should DELETE one emoticon', async () => {
         const emoticon = await model.emoticons.findOne({
-            order:[['id', 'DESC']],
+            order: [
+                ['id', 'DESC'],
+            ],
             raw: true,
         });
         chai.request(server)

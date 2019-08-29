@@ -48,8 +48,8 @@ exports.sendInvite = (req, res) => {
                 const mailOptions = {
                     from: process.env.APP_EMAIL,
                     to: email,
-                    subject: 'App invite test',
-                    text: 'That was easy!',
+                    subject: 'Ratings app invitation',
+                    text: 'Hello, \n\nYou have been invited to be administrator of ratings app: \nhttps://incubator-2019-rating-admin.netlify.com \n\n Best regards, \n\n Ratings app team',
                 };
                 transporter.sendMail(mailOptions, (error, info) => {
                     if (error) {
@@ -58,7 +58,7 @@ exports.sendInvite = (req, res) => {
                         console.log(`Email sent: ${info.response}`);
                     }
                 });
-                return res.json(response.classic(false, newInvite, 'Invitation sent!'));
+                return res.status(201).json(response.classic(false, newInvite, 'Invitation sent!'));
             }).catch(() => res.json(
                 response.classic(true, [], 'Server error'),
             ));

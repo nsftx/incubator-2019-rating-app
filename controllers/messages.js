@@ -80,7 +80,7 @@ exports.updateMessage = (req, res) => {
                 id: messageId,
             },
         })
-        .then(messages => res.json(response.classic(false, messages, 'New message has been updated.')))
+        .then(messages => res.json(response.classic(false, messages, 'Message has been updated!')))
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
     return 1;
 };
@@ -114,6 +114,6 @@ exports.deleteMessage = (req, res) => {
                 id: messageId,
             },
         })
-        .then(message => res.json(response.classic(false, message, 'New message has been deleted.')))
+        .then(message => res.json(response.classic(false, message, 'Message has been deleted.')))
         .catch(() => res.json(response.classic(true, {}, 'Server error')));
 };

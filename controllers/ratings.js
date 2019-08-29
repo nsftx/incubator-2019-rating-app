@@ -113,8 +113,6 @@ const checkRatingsStatus = async (settings) => {
         raw: true,
     });
     const averageRating = sum['emoticon.sum'] / ratingsCount.count;
-    /* console.log(sum['emoticon.sum'], ratingsCount.count);
-    console.log('Average rating:', averageRating); */
     if (ratingsCount.count > 200 && averageRating < 3.5) {
         // to avoid spam in slack check every 50th rating in day
         if (ratingsCount.count % 50 === 0) {
@@ -124,9 +122,7 @@ const checkRatingsStatus = async (settings) => {
 };
 
 exports.getAllRatings = (req, res) => {
-    model.ratings.findAll({
-            include: [model.settings],
-        })
+    model.ratings.findAll()
         .then(ratings => res.json(classic(false, ratings)))
         .catch(() => res.json(classic(true, [], 'Server error')));
 };
@@ -161,8 +157,6 @@ exports.getRatingsByHour = async (req, res) => {
                     },
                 },
                 attributes: [
-                    /* [sequelize.fn('time', new Date(`${date}T${j}:00:00.000Z`)), 'start'],
-                    [sequelize.fn('time', new Date(`${date}T${z}:00:00.000Z`)), 'end'], */
                     'emoticonId',
                     [sequelize.fn('count', sequelize.col('emoticonId')), 'count'],
 
@@ -177,7 +171,6 @@ exports.getRatingsByHour = async (req, res) => {
     const dataArray = [];
 
     Promise.all(promises).then((result) => {
-        /* const filtered = result.filter(el => el.length > 0); */
         for (let i = 0; i < 24; i += interval) {
             let z = String(i + interval);
             let j = String(i);
@@ -190,7 +183,6 @@ exports.getRatingsByHour = async (req, res) => {
             }
 
             const data = {
-                /* start: `${date} ${j}:00:00`, */
                 time: `${date} ${z}:00:00`,
             };
             dataArray.push(data);
@@ -253,7 +245,6 @@ exports.getRatingsByDays = async (req, res) => {
     const dataArray = [];
 
     Promise.all(promises).then((result) => {
-        // const filtered = result.filter(el => el.length > 0);
         start = new Date(startDate);
         while (start <= end) {
             let month = start.getMonth() + 1;
@@ -392,7 +383,6 @@ exports.createManyRatings = async (req, res) => {
     });
 
     Promise.all(promises).then((result) => {
-        /* const filtered = result.filter(el => el.length > 0); */
         res.json(classic(false, result, 'Ratings have been created'));
     });
 };
@@ -423,6 +413,7 @@ exports.createRating = async (req, res) => {
         })
         .then((ratings) => {
             const data = ratings.dataValues;
+            data.type = 'ratings';
             data.time = moment.utc(ratings.dataValues.time).format('YYYY-MM-DD HH:mm:ss');
             io.emit('newRating', ratings);
             res.status(201).json(classic(false, ratings, 'New reaction has been added.'));
@@ -430,7 +421,10 @@ exports.createRating = async (req, res) => {
         .then(() => {
             checkRatingsStatus(settings);
         })
-        .catch(() => res.json(classic(true, {}, 'Server error')));
+        .catch((e) => {
+            console.log(e);
+            return res.json(classic(true, {}, 'Server error'));
+        });
 };
 exports.updateRating = (req, res) => {
     const ratingId = req.params.id;
@@ -457,6 +451,6 @@ exports.deleteRating = (req, res) => {
                 id: ratingId,
             },
         })
-        .then(rating => res.json(classic(false, rating, 'Rating has been deleted')))
+        .then(rating => res.json(classic(false, rating, 'Rating has been deleted.')))
         .catch(() => res.json(classic(true, {}, 'Server error')));
 };
