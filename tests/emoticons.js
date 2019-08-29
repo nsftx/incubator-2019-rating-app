@@ -37,10 +37,6 @@ describe('/GET/:id one emoticon', () => {
             ],
             raw: true,
         });
-        /* const emoticon = {
-                    id: 117
-                };
-         */
 
         chai.request(server)
             .get(`/api/v1/emoticons/${emoticon.id}`)

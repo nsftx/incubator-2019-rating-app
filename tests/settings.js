@@ -10,7 +10,6 @@ const model = require('../models/index');
 
 
 const settingsRewire = rewire('../controllers/settings.js');
-/* const hasProps = userRewire.__get__('hasProps') */
 const getEmoticonsForSettings = settingsRewire.__get__('getEmoticonsForSettings');
 const getMessage = settingsRewire.__get__('getMessage');
 
@@ -192,26 +191,3 @@ describe('/PUT one settings', () => {
             });
     });
 });
-/* describe('/DELETE one setting', () => {
-    it('it should DELETE one setting', async () => {
-        const settings = await model.settings.findOne({
-            order: [
-                ['id', 'DESC'],
-            ],
-            raw: true,
-        });
-
-        chai.request(server)
-            .delete(`/api/v1/settings/${settings.id}`)
-            .set('Authorization', '123')
-            .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.a('object');
-                res.body.should.have.property('error');
-                res.body.error.should.be.eql(false);
-                res.body.error.should.be.a('boolean');
-                res.body.should.have.property('message')
-                    .eql('Settings have been deleted.');
-            });
-    });
-}); */
