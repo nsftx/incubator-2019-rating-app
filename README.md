@@ -8,6 +8,12 @@ Rating application is a simple application that is used for simple rating of exp
 
 For this project you will need to install Node.js. Follow the link below on how to download and install using the installer package available from the Node.js web site [Installing Node.js®](https://nodejs.org/en/download/package-manager/)
 
+ORM used on this project is Sequelize. To install sequelize run following command:
+
+```
+npm install --save sequelize
+```
+
 ### Installing
 
 You should have some familiarity with command line instructions to run this application.
