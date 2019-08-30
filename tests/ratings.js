@@ -17,7 +17,6 @@ chai.use(chaiHttp);
 const ratingsRewire = rewire('../controllers/ratings.js');
 
 const getCurrentSettings = ratingsRewire.__get__('getCurrentSettings');
-// const getEmoticons = ratingsRewire.__get__('getEmoticons');
 const getEmoticonsForSettings = ratingsRewire.__get__('getEmoticonsForSettings');
 
 const getSettings = async () => {
@@ -37,15 +36,6 @@ describe('get current settings', () => {
     });
 });
 
-/* describe('get emoticons', () => {
-    it('Should return an array', async () => {
-        const settings = await getSettings();
-        const data = await getEmoticons(settings.emoticonsGroupId);
-        assert.isArray(data);
-        assert.equal(data.length, 5);
-    });
-}); */
-
 describe('get emoticons for settings', () => {
     it('Should return array with 3-5 elements', async () => {
         const settings = await getSettings();
@@ -58,7 +48,6 @@ describe('get emoticons for settings', () => {
 });
 
 // REQUEST takes too much time and is not used
-
 describe('/GET ratings', () => {
     it.skip('it should GET all the ratings', (done) => {
         chai.request(server)
