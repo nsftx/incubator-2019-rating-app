@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.5.4",
-    "acorn": "^6.2.0",
+    "acorn": "^6.4.1",
     "babel-eslint": "^8.2.6",
     "eslint": "^5.16.0",
     "eslint-config-airbnb": "^17.1.1",
